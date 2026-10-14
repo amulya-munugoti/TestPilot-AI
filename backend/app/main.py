@@ -8,13 +8,13 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from .ai import analyze_failure
 from .database import Base, engine, get_db, SessionLocal
 from .models import Analysis, Project, TestRun
-from .runner import run_sample_tests
+from .runner import parse_test_counts, run_sample_tests
 from .schemas import ProjectCreate, ProjectOut, RunOut
 
 
@@ -33,6 +33,18 @@ app = FastAPI(title="TestPilot AI API", version="1.0.0", lifespan=lifespan)
 origins = [x.strip() for x in os.getenv("FRONTEND_ORIGIN", "http://localhost:8501").split(",") if x.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"])
 _sensitive_requests = defaultdict(deque)
+
+
+def effective_counts(run: TestRun) -> dict[str, int]:
+    counts = {key: int(getattr(run, key) or 0) for key in ("passed", "failed", "skipped", "errors")}
+    # Older runs may have status/output but zero counters from the previous summary parser.
+    if not any(counts.values()):
+        counts = parse_test_counts(run.output or "")
+    return counts
+
+
+def visible_run(run: TestRun) -> RunOut:
+    return RunOut.model_validate(run).model_copy(update=effective_counts(run))
 
 
 @app.middleware("http")
@@ -62,12 +74,15 @@ def health():
 @app.get("/api/dashboard")
 def dashboard(db: Session = Depends(get_db)):
     runs = db.scalars(select(TestRun).order_by(TestRun.created_at.desc()).limit(10)).all()
-    totals = db.execute(select(func.count(TestRun.id), func.coalesce(func.sum(TestRun.passed), 0), func.coalesce(func.sum(TestRun.failed), 0))).one()
-    total, passed, failed = totals
-    bug_runs = [run for run in runs if run.failed or run.errors]
+    all_runs = db.scalars(select(TestRun)).all()
+
+    total = len(all_runs)
+    passed = sum(effective_counts(run)["passed"] for run in all_runs)
+    failed = sum(effective_counts(run)["failed"] for run in all_runs)
+    bug_runs = [run for run in runs if effective_counts(run)["failed"] or effective_counts(run)["errors"] or run.status != "passed"]
     return {"total_test_runs": total, "passed_tests": passed, "failed_tests": failed,
             "pass_rate": round(passed * 100 / max(passed + failed, 1), 1) if total else 0,
-            "recent_runs": [RunOut.model_validate(x) for x in runs], "recent_bugs": [RunOut.model_validate(x) for x in bug_runs[:5]]}
+            "recent_runs": [visible_run(x) for x in runs], "recent_bugs": [visible_run(x) for x in bug_runs[:5]]}
 
 
 @app.get("/api/projects", response_model=list[ProjectOut])
@@ -122,7 +137,8 @@ def create_test_run(project_id: int, db: Session = Depends(get_db)):
 
 @app.get("/api/test-runs", response_model=list[RunOut])
 def test_runs(limit: int = Query(50, ge=1, le=100), db: Session = Depends(get_db)):
-    return db.scalars(select(TestRun).options(selectinload(TestRun.analyses)).order_by(TestRun.created_at.desc()).limit(limit)).all()
+    runs = db.scalars(select(TestRun).options(selectinload(TestRun.analyses)).order_by(TestRun.created_at.desc()).limit(limit)).all()
+    return [visible_run(run) for run in runs]
 
 
 @app.get("/api/test-runs/{run_id}", response_model=RunOut)
@@ -130,14 +146,15 @@ def get_test_run(run_id: int, db: Session = Depends(get_db)):
     run = db.scalar(select(TestRun).options(selectinload(TestRun.analyses)).where(TestRun.id == run_id))
     if not run:
         raise HTTPException(404, "Test run not found")
-    return run
+    return visible_run(run)
 
 
 async def save_analysis(run_id: int, generate_tests: bool, db: Session):
     run = db.get(TestRun, run_id)
     if not run:
         raise HTTPException(404, "Test run not found")
-    if not (run.failed or run.errors):
+    counts = effective_counts(run)
+    if not (counts["failed"] or counts["errors"] or run.status != "passed"):
         raise HTTPException(400, "This run has no failure to analyze")
     result = await analyze_failure(run.output, generate_tests)
     db.add(Analysis(run_id=run.id, kind="generated_tests" if generate_tests else "analysis", **result))
@@ -160,7 +177,7 @@ def report(run_id: int, db: Session = Depends(get_db)):
     run = db.scalar(select(TestRun).options(selectinload(TestRun.analyses)).where(TestRun.id == run_id))
     if not run:
         raise HTTPException(404, "Test run not found")
-    return json.loads(RunOut.model_validate(run).model_dump_json())
+    return json.loads(visible_run(run).model_dump_json())
 
 
 @app.get("/api/settings")

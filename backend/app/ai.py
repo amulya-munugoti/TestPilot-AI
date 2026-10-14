@@ -18,7 +18,14 @@ def redact(text: str) -> str:
 async def analyze_failure(traceback: str, generate_tests: bool = False) -> dict:
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
-        return {"status": "unavailable", "content": "AI analysis is unavailable because GEMINI_API_KEY is not configured. Test execution and reports are still available."}
+        return {
+            "status": "unavailable",
+            "content": (
+                "Gemini is not enabled yet: GEMINI_API_KEY is missing. Add your key to "
+                "backend/.env, then restart the backend. Keep the key private; test execution "
+                "and reports work without it."
+            ),
+        }
     try:
         from google import genai
         client = genai.Client(api_key=api_key)
