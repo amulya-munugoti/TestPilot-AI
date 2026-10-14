@@ -1,6 +1,14 @@
-# TestPilot AI
+# TestPilot AI — Intelligent Bug Detection and AI-Powered Test Analysis Platform
 
-TestPilot AI is a beginner-friendly test analysis dashboard. It runs a small, reviewed Pytest sample suite, stores actual outcomes and tracebacks, and can optionally send a redacted failure to Gemini for analysis. The default local database is SQLite; production can use PostgreSQL.
+TestPilot AI is a Python-first project for running automated tests, understanding failures and keeping a clear test history. It combines a **Streamlit dashboard**, a **FastAPI backend**, **Pytest**, SQLAlchemy persistence and optional **Gemini** failure analysis.
+
+## Project overview
+
+When a developer runs the bundled sample suite, TestPilot records the real Pytest result, execution time and traceback. The dashboard presents run statistics and history. If Gemini is configured, a visitor can ask it to explain a failure in beginner-friendly language or suggest additional tests. AI output is clearly labelled and never changes the actual test result.
+
+The project is designed as an internship portfolio demo: it demonstrates Python web development, REST APIs, database persistence, test automation, optional AI integration and safe handling of test execution. The public demo runs only a reviewed sample suite; it does not accept or execute visitor-uploaded code.
+
+**Current deployment status:** prepared for deployment, but not deployed. No public demo URL is available yet.
 
 **Public demo safety:** project records are metadata. Test execution is pinned to `backend/sample_project`; visitors cannot submit code, commands, or paths. The demo has no login or per-visitor isolation, so do not put private information in it. AI suggestions can be reviewed and exported, but the shared public app does not apply file changes.
 
