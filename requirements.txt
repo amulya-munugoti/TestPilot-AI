@@ -1,0 +1,3 @@
+# Shared Python environment for the FastAPI backend and Streamlit UI.
+-r backend/requirements.txt
+-r frontend/requirements.txt

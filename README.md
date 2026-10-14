@@ -42,45 +42,38 @@ Python is the only application language maintained in this project: FastAPI hand
 
 ## Local setup (Windows PowerShell)
 
-Open PowerShell in the project root:
+Run these commands from the project root. The root `requirements.txt` includes the backend and Streamlit UI dependencies, so one virtual environment is enough:
 
 ```powershell
-git --version
-python --version
 py -3.12 --version
-```
-
-If `py -3.12` is unavailable, install Python 3.12 from [python.org](https://www.python.org/downloads/windows/) and ensure the Python Launcher is included. Create a virtual environment and install backend dependencies:
-
-```powershell
-Set-Location .\backend
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-Copy-Item .env.example .env
+Copy-Item .\backend\.env.example .\backend\.env
+Copy-Item .\frontend\.env.example .\frontend\.env
 ```
+
+If `py -3.12` is unavailable, install Python 3.12 from [python.org](https://www.python.org/downloads/windows/) and ensure the Python Launcher is included. If your root `.venv` already exists and is activated, you can simply run `pip install -r requirements.txt` from the project root.
 
 The copied `.env` already selects local SQLite. You can leave `GEMINI_API_KEY` blank; the core app runs without AI. To use Gemini, create a key in Google AI Studio and enter it privately in `backend/.env`. Never paste it into frontend variables, source code, screenshots, GitHub, or chat. Keep `AI_MODEL=gemini-3.8-flash` unless your AI Studio account shows a different free-eligible model. The default model is listed with free standard input/output pricing today; per-project quotas vary, and free-tier prompt data may be used to improve Google's products. Do not send private source code or sensitive logs.
 
-Run the backend from the `backend` directory:
+In the first PowerShell window, run the backend from its directory:
 
 ```powershell
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+Set-Location .\backend
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The API creates local tables and seeds `TestPilot Sample` at startup. Interactive API docs are at `http://127.0.0.1:8000/docs`.
 
-In a second PowerShell window, start the Python UI:
+In a second PowerShell window, activate the same root environment, then start the UI:
 
 ```powershell
-Set-Location .\frontend
-Copy-Item .env.example .env
-py -3.12 -m venv .venv
+Set-Location 'C:\Users\Amulya\Desktop\TestPilot AI'
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-streamlit run app.py
+Set-Location .\frontend
+python -m streamlit run app.py
 ```
 
 Open `http://localhost:8501`. `TESTPILOT_API_URL` defaults to `http://127.0.0.1:8000/api` and can be changed in `frontend/.env`.
@@ -104,18 +97,18 @@ Install the PostgreSQL driver before using that URL (`pip install psycopg[binary
 
 ## Tests and build
 
-From `backend`:
+From the project root (with the virtual environment active):
 
 ```powershell
-python -m pytest
+python -m pytest .\backend\tests
 ```
 
 Tests cover health/settings, validation and project CRUD, rejecting non-sample execution, a real sample run and traceback, dashboard/history/report persistence, AI-unconfigured behavior, mocked AI responses, analysis validation, and secret redaction. They make no Gemini network call.
 
-From `frontend`:
+To check the Streamlit file syntax, run from the project root:
 
 ```powershell
-python -m compileall -q app.py
+python -m compileall -q .\frontend\app.py
 ```
 
 ## Deploy for a free demo
