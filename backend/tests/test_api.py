@@ -19,6 +19,7 @@ def test_project_create_validation_read_and_delete(client):
     assert sample[0]["name"] == "TestPilot Sample"
     invalid = client.post("/api/projects", json={"name": "unsafe", "project_type": "arbitrary-command"})
     assert invalid.status_code == 422
+    assert client.post("/api/projects", json={"name": "   "}).status_code == 422
     created = client.post("/api/projects", json={"name": "Checkout API", "description": "Backend demo"})
     assert created.status_code == 201
     project_id = created.json()["id"]
@@ -96,6 +97,17 @@ def test_analysis_rejects_non_failure_and_handles_model_errors(client, monkeypat
     run = client.post(f"/api/projects/{project['id']}/test-runs").json()
     assert client.post(f"/api/test-runs/{run['id']}/analyze").status_code == 400
     assert client.post("/api/test-runs/999/analyze").status_code == 404
+
+
+def test_sensitive_endpoints_have_request_limit(client, monkeypatch):
+    async def fake_failure(_traceback, generate_tests=False):
+        return {"status": "unavailable", "content": "AI not configured"}
+    monkeypatch.setattr(main, "analyze_failure", fake_failure)
+    project = client.get("/api/projects").json()[0]
+    run = client.post(f"/api/projects/{project['id']}/test-runs").json()
+    for _ in range(10):
+        assert client.post(f"/api/test-runs/{run['id']}/analyze").status_code == 200
+    assert client.post(f"/api/test-runs/{run['id']}/analyze").status_code == 429
 
 
 def test_secret_redaction():

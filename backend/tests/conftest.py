@@ -11,6 +11,8 @@ from app.main import app
 
 @pytest.fixture
 def client():
+    from app import main
+    main._sensitive_requests.clear()
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 

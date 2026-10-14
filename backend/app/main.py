@@ -41,6 +41,10 @@ async def limit_sensitive_requests(request: Request, call_next):
         address = request.client.host if request.client else "unknown"
         key = (address, request.url.path.rsplit("/", 1)[-1] if request.url.path.endswith(("/analyze", "/generate-tests")) else "run")
         now = time.monotonic()
+        if len(_sensitive_requests) > 1024:
+            for old_key, old_attempts in list(_sensitive_requests.items()):
+                if not old_attempts or now - old_attempts[-1] > 60:
+                    _sensitive_requests.pop(old_key, None)
         attempts = _sensitive_requests[key]
         while attempts and now - attempts[0] > 60:
             attempts.popleft()
