@@ -1,6 +1,6 @@
 import os
 os.environ["DATABASE_URL"] = "sqlite:///./testpilot-test.db"
-os.environ["FRONTEND_ORIGIN"] = "http://localhost:5173"
+os.environ["FRONTEND_ORIGIN"] = "http://localhost:8501"
 
 import pytest
 from fastapi.testclient import TestClient

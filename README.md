@@ -6,11 +6,15 @@ TestPilot AI is a beginner-friendly test analysis dashboard. It runs a small, re
 
 ## Architecture
 
-- `frontend/`: React, Vite, React Router, Axios, Lucide, Tailwind. Dashboard, projects, history, run detail, settings, responsive layout and persisted dark mode.
+- `frontend/app.py`: Streamlit UI written in Python. It provides the dashboard, project management, test history, run detail, settings and dark appearance toggle.
 - `backend/app/`: FastAPI REST API, SQLAlchemy 2 models, controlled subprocess runner, optional Google GenAI client, CORS and simple in-memory request limits.
 - `backend/migrations/`: Alembic configuration and initial schema migration.
 - `backend/sample_project/`: two genuine Pytest cases: one passes and one intentionally fails to make a traceback visible.
 - Local persistence defaults to SQLite. Set `DATABASE_URL` to a PostgreSQL SQLAlchemy URL for hosted deployments.
+
+## Language choice
+
+Python is the only application language maintained in this project: FastAPI handles the API and test execution, while Streamlit renders the dashboard and calls that API with Python. There are no JavaScript or TypeScript app files or Node build steps. The remaining non-Python files are configuration, dependency lists and this documentation; Streamlit supplies its own browser interface.
 
 ## Features
 
@@ -24,7 +28,7 @@ TestPilot AI is a beginner-friendly test analysis dashboard. It runs a small, re
 
 ## Requirements
 
-- Windows 10/11, Git, Node.js 20+ (Node 24 is fine), npm.
+- Windows 10/11, Git and Python 3.12.
 - Python 3.12 recommended for the smoothest compatibility across dependencies. The pasted brief reported Python 3.14.4, but Python was not available on PATH in the inspected shell. Recent FastAPI, SQLAlchemy, pytest and Google GenAI support newer Python releases; if you use 3.14 and installation fails for a compiled dependency, use Python 3.12.
 - PostgreSQL is optional locally; SQLite starts without a database server.
 
@@ -34,8 +38,7 @@ Open PowerShell in the project root:
 
 ```powershell
 git --version
-node --version
-npm --version
+python --version
 py -3.12 --version
 ```
 
@@ -60,16 +63,19 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 The API creates local tables and seeds `TestPilot Sample` at startup. Interactive API docs are at `http://127.0.0.1:8000/docs`.
 
-In a second PowerShell window:
+In a second PowerShell window, start the Python UI:
 
 ```powershell
 Set-Location .\frontend
-npm install
 Copy-Item .env.example .env
-npm run dev
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+streamlit run app.py
 ```
 
-Open the local URL Vite prints (normally `http://localhost:5173`). `VITE_API_BASE_URL` defaults to `http://localhost:8000/api`.
+Open `http://localhost:8501`. `TESTPILOT_API_URL` defaults to `http://127.0.0.1:8000/api` and can be changed in `frontend/.env`.
 
 ## Database and migrations
 
@@ -101,21 +107,21 @@ Tests cover health/settings, validation and project CRUD, rejecting non-sample e
 From `frontend`:
 
 ```powershell
-npm run build
+python -m compileall -q app.py
 ```
 
 ## Deploy for a free demo
 
-The included `render.yaml` describes a Render static frontend and Python web service. Connect a GitHub repository in Render and deploy the blueprint; no paid plan is selected. Create a Neon free PostgreSQL project (or use another PostgreSQL host) and set the production backend `DATABASE_URL` to its pooled or direct SSL URL. Add the generated frontend URL to backend `FRONTEND_ORIGIN`; add the backend URL plus `/api` to frontend `VITE_API_BASE_URL`. Set the Gemini key privately on the backend only, and leave it blank if you do not want AI. The backend and frontend variables are build/runtime specific: redeploy the frontend after changing `VITE_API_BASE_URL`.
+The included `render.yaml` describes two Python web services: the FastAPI backend and the Streamlit UI. Connect the repository in Render and deploy the blueprint; both services use the free plan. Create a Neon free PostgreSQL project (or another PostgreSQL host) and set backend `DATABASE_URL` to its SSL URL. Set the UI service's `TESTPILOT_API_URL` to the backend URL plus `/api`. Set `GEMINI_API_KEY` privately on the backend only, and leave it blank if you do not want AI. The Streamlit UI calls FastAPI from its Python server, so browser CORS is not used for those UI requests.
 
 Deployment checklist:
 
 1. Push this workspace to a GitHub repository you control.
 2. Create the Neon Free database; copy its PostgreSQL connection string without sharing it.
-3. In Render, create services from `render.yaml` (or configure a static site from `frontend` and a Python web service from `backend`).
+3. In Render, create the two Python services from `render.yaml`.
 4. Set backend `DATABASE_URL`, `FRONTEND_ORIGIN`, `APP_ENV=production`, and optionally `GEMINI_API_KEY` in the provider dashboard. Keep `AI_MODEL=gemini-3.8-flash`.
-5. Set frontend `VITE_API_BASE_URL=https://YOUR-API.onrender.com/api`, deploy, then update backend `FRONTEND_ORIGIN=https://YOUR-FRONTEND.onrender.com` and redeploy the API.
-6. Confirm `/api/health`, open the frontend, run the bundled tests, inspect the real failure and export a JSON report.
+5. Set the UI's `TESTPILOT_API_URL=https://YOUR-API.onrender.com/api` and deploy both services.
+6. Confirm `/api/health`, open the Streamlit UI, run the bundled tests, inspect the real failure and export a JSON report.
 
 The Render free web service sleeps after 15 minutes idle and its filesystem is ephemeral, so SQLite is not suitable for hosted history. Expect a cold start after sleep. Free service-hours, bandwidth and build limits apply; do not enable billing or add a payment method for this project. Neon currently lists 1 GB storage and 100 compute-hours per project per month on Free, scaling compute to zero while idle; quotas and policies can change. Free services are suitable for a portfolio demo, not a production availability guarantee. The Gemini API free tier has model and rate limits that may be quota exhausted; AI gracefully becomes unavailable. Its current free tier may use submitted content to improve Google's products.
 
@@ -133,7 +139,7 @@ The Render free web service sleeps after 15 minutes idle and its filesystem is e
 
 - **`python`/`py` not found:** install Python 3.12 and reopen PowerShell. Check `py -0p` for installed versions.
 - **Pytest could not start:** activate `backend/.venv` and run `pip install -r requirements.txt`.
-- **Browser cannot reach the API:** start Uvicorn, confirm backend health, and check `VITE_API_BASE_URL` and `FRONTEND_ORIGIN`; restart/rebuild Vite after `.env` changes.
+- **UI cannot reach the API:** start Uvicorn, confirm backend health, and check `TESTPILOT_API_URL` in `frontend/.env`.
 - **Dashboard shows no data:** start the API. A fresh SQLite file seeds the sample project; metrics stay zero until you run it.
 - **Gemini unavailable:** verify the private backend key, model access and AI Studio quota. A 429/quota exhaustion is not a passing or fabricated analysis.
 - **Hosted history disappears:** use PostgreSQL `DATABASE_URL`; hosted free web-service local files are ephemeral.

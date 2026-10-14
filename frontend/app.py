@@ -14,7 +14,13 @@ from dotenv import load_dotenv
 
 
 load_dotenv(Path(__file__).with_name(".env"))
-API_BASE = st.secrets.get("TESTPILOT_API_URL", os.getenv("TESTPILOT_API_URL", "http://127.0.0.1:8000/api")).rstrip("/")
+API_BASE = os.getenv("TESTPILOT_API_URL", "").strip()
+if not API_BASE:
+    try:
+        API_BASE = st.secrets.get("TESTPILOT_API_URL", "")
+    except Exception:
+        API_BASE = ""
+API_BASE = (API_BASE or "http://127.0.0.1:8000/api").rstrip("/")
 REQUEST_TIMEOUT_SECONDS = 35
 
 st.set_page_config(page_title="TestPilot AI", page_icon="🧪", layout="wide", initial_sidebar_state="expanded")
@@ -110,7 +116,7 @@ def show_run_detail(run: dict[str, Any], key_prefix: str = "detail") -> None:
             with st.spinner("Asking the backend to analyze the real traceback…"):
                 try:
                     result = api_request("POST", f"/test-runs/{run['id']}/analyze")
-                    st.session_state[f"analysis-{run['id"]}"] = result
+                    st.session_state[f"analysis-{run['id']}"] = result
                 except ApiError as exc:
                     st.session_state[f"analysis-error-{run['id']}"] = str(exc)
         if right.button("Generate test ideas", key=f"{key_prefix}-generate-{run['id']}", use_container_width=True):
@@ -247,12 +253,13 @@ def history_page() -> None:
         return
     run_table(runs)
     if runs:
+        runs_by_id = {run["id"]: run for run in runs}
         selected_id = st.selectbox(
             "Inspect a run",
-            options=[run["id"] for run in runs],
-            format_func=lambda run_id: next(
-                f"Run #{run_id} · {next(run for run in runs if run['id'] == run_id)['status']} · {format_time(next(run for run in runs if run['id'] == run_id).get('created_at'))}"
-                for run in runs if run["id"] == run_id
+            options=list(runs_by_id),
+            format_func=lambda run_id: (
+                f"Run #{run_id} · {runs_by_id[run_id]['status']} · "
+                f"{format_time(runs_by_id[run_id].get('created_at'))}"
             ),
         )
         try:

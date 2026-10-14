@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="TestPilot AI API", version="1.0.0", lifespan=lifespan)
-origins = [x.strip() for x in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",") if x.strip()]
+origins = [x.strip() for x in os.getenv("FRONTEND_ORIGIN", "http://localhost:8501").split(",") if x.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"])
 _sensitive_requests = defaultdict(deque)
 
