@@ -26,6 +26,58 @@ REQUEST_TIMEOUT_SECONDS = 35
 st.set_page_config(page_title="TestPilot AI", page_icon="🧪", layout="wide", initial_sidebar_state="expanded")
 
 
+def apply_theme(dark: bool) -> None:
+    """Apply a quiet, consistent workspace theme without adding frontend dependencies."""
+    if dark:
+        page_bg, panel_bg, text, muted, border, sidebar = "#101827", "#182335", "#edf3fb", "#9aa9bd", "#2b3a50", "#0c1421"
+        input_bg = "#111c2c"
+    else:
+        page_bg, panel_bg, text, muted, border, sidebar = "#f5f7fb", "#ffffff", "#172033", "#69758a", "#e5eaf2", "#111c32"
+        input_bg = "#ffffff"
+    st.markdown(
+        f"""
+        <style>
+        :root {{ --tp-bg:{page_bg}; --tp-panel:{panel_bg}; --tp-text:{text}; --tp-muted:{muted}; --tp-border:{border}; --tp-sidebar:{sidebar}; }}
+        body,[data-testid="stAppViewContainer"] {{ background:var(--tp-bg); color:var(--tp-text); }}
+        [data-testid="stMarkdownContainer"],[data-testid="stText"] {{ color:var(--tp-text); }}
+        [data-testid="stHeader"] {{ background:transparent; }}
+        [data-testid="stMain"] .block-container {{ max-width:1320px; padding:2.3rem 3.2rem 4rem; }}
+        [data-testid="stSidebar"] {{ background:var(--tp-sidebar); border-right:1px solid rgba(255,255,255,.07); }}
+        [data-testid="stSidebar"] * {{ color:#e8eef8; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] label {{ border-radius:9px; padding:.25rem .4rem; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {{ background:rgba(255,255,255,.07); }}
+        h1,h2,h3 {{ color:var(--tp-text); letter-spacing:-.035em; }}
+        h1 {{ font-size:2rem !important; font-weight:700 !important; margin-bottom:.25rem !important; }}
+        h2 {{ font-size:1.25rem !important; font-weight:650 !important; margin-top:1.6rem !important; }}
+        [data-testid="stCaptionContainer"] {{ color:var(--tp-muted); }}
+        [data-testid="stMetric"] {{ background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 8px rgba(24,39,75,.035); }}
+        [data-testid="stMetricLabel"] {{ color:var(--tp-muted); font-size:.83rem; }}
+        [data-testid="stMetricValue"] {{ color:var(--tp-text); font-size:1.8rem; font-weight:700; }}
+        [data-testid="stDataFrame"] {{ border:1px solid var(--tp-border); border-radius:12px; overflow:hidden; background:var(--tp-panel); }}
+        [data-testid="stExpander"] {{ background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:12px; }}
+        [data-testid="stVerticalBlockBorderWrapper"] {{ background:var(--tp-panel); border-color:var(--tp-border) !important; border-radius:14px; }}
+        [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stSelectbox"] [data-baseweb="select"] > div {{ background:{input_bg}; border-color:var(--tp-border); border-radius:9px; }}
+        [data-testid="stButton"] button,[data-testid="stDownloadButton"] button {{ border-radius:9px; font-weight:600; min-height:2.55rem; }}
+        [data-testid="stButton"] button[kind="primary"] {{ box-shadow:0 4px 12px rgba(55,103,232,.2); }}
+        [data-testid="stAlert"] {{ border-radius:11px; }}
+        .tp-kicker {{ color:#5679d8; font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; font-weight:700; margin-bottom:.25rem; }}
+        .tp-sidebar-brand {{ font-size:1.16rem; font-weight:750; letter-spacing:-.03em; margin:.3rem 0 0; }}
+        .tp-sidebar-mark {{ display:inline-grid; place-items:center; width:2rem; height:2rem; border-radius:9px; background:#4268d5; color:white; font-weight:800; margin-right:.55rem; }}
+        .tp-sidebar-note {{ color:#9eacc2 !important; font-size:.78rem; line-height:1.5; }}
+        .tp-section-note {{ color:var(--tp-muted); margin-top:-.6rem; margin-bottom:1rem; }}
+        @media (max-width: 800px) {{ [data-testid="stMain"] .block-container {{ padding:1.4rem 1rem 3rem; }} h1 {{ font-size:1.7rem !important; }} }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def page_header(section: str, title: str, description: str) -> None:
+    st.markdown(f'<div class="tp-kicker">{section}</div>', unsafe_allow_html=True)
+    st.title(title)
+    st.markdown(f'<div class="tp-section-note">{description}</div>', unsafe_allow_html=True)
+
+
 class ApiError(RuntimeError):
     """A readable error returned by the backend API."""
 
@@ -144,8 +196,12 @@ def show_run_detail(run: dict[str, Any], key_prefix: str = "detail") -> None:
 
 
 def dashboard() -> None:
-    st.title("TestPilot AI")
-    st.caption("A Python-first workspace for controlled test execution and beginner-friendly failure analysis.")
+    heading, action = st.columns([6, 2], gap="large")
+    with heading:
+        page_header("Workspace / Overview", "Test runs at a glance", "Monitor your sample suite, review recent results, and inspect failures.")
+    with action:
+        st.markdown("<div style='height:1.7rem'></div>", unsafe_allow_html=True)
+        run_clicked = st.button("Run sample tests", type="primary", icon="▶", use_container_width=True)
     try:
         data = api_request("GET", "/dashboard")
     except ApiError as exc:
@@ -158,7 +214,7 @@ def dashboard() -> None:
     metrics[2].metric("Failed tests", data["failed_tests"])
     metrics[3].metric("Pass rate", f"{data['pass_rate']}%")
 
-    if st.button("Run bundled sample suite", type="primary", icon="▶"):
+    if run_clicked:
         try:
             projects = api_request("GET", "/projects")
             sample = next((project for project in projects if project["name"] == "TestPilot Sample"), None)
@@ -173,9 +229,9 @@ def dashboard() -> None:
         except ApiError as exc:
             show_api_error(exc)
 
-    st.subheader("Recent test runs")
+    st.subheader("Recent runs")
     run_table(data.get("recent_runs", []))
-    st.subheader("Recent bug reports")
+    st.subheader("Needs attention")
     bugs = data.get("recent_bugs", [])
     if bugs:
         for run in bugs:
@@ -191,8 +247,7 @@ def dashboard() -> None:
 
 
 def projects_page() -> None:
-    st.title("Projects")
-    st.caption("Project records describe supported configurations. Test runs remain restricted to the reviewed sample.")
+    page_header("Workspace / Projects", "Projects", "Manage project records and review the configurations available in this demo.")
     with st.form("create-project", clear_on_submit=True):
         name = st.text_input("Project name", max_chars=100)
         description = st.text_area("Description", max_chars=500)
@@ -244,8 +299,7 @@ def projects_page() -> None:
 
 
 def history_page() -> None:
-    st.title("Test history")
-    st.caption("Recorded Pytest runs, tracebacks, AI analyses and downloadable reports.")
+    page_header("Workspace / Activity", "Test history", "Browse recorded runs, inspect tracebacks, and download reports.")
     try:
         runs = api_request("GET", "/test-runs?limit=100")
     except ApiError as exc:
@@ -271,8 +325,7 @@ def history_page() -> None:
 
 
 def settings_page() -> None:
-    st.title("Settings")
-    st.caption("Backend connection and safe demo configuration.")
+    page_header("Workspace / Configuration", "Settings", "Check the API connection and review the demo configuration.")
     st.code(API_BASE, language="text")
     try:
         settings = api_request("GET", "/settings")
@@ -297,18 +350,15 @@ def settings_page() -> None:
 
 
 with st.sidebar:
-    st.title("TestPilot AI")
-    st.caption("Python testing workspace")
+    st.markdown('<div class="tp-sidebar-brand"><span class="tp-sidebar-mark">T</span>TestPilot</div>', unsafe_allow_html=True)
+    st.markdown('<p class="tp-sidebar-note">Test automation workspace</p>', unsafe_allow_html=True)
+    st.markdown("<div style='height:.6rem'></div>", unsafe_allow_html=True)
     page = st.radio("Navigation", ("Overview", "Projects", "Test history", "Settings"), label_visibility="collapsed")
     st.divider()
     dark_mode = st.toggle("Dark appearance", value=False)
-    st.caption("Safe demo · Python · Pytest")
+    st.markdown('<p class="tp-sidebar-note">Safe demo · Python · Pytest</p>', unsafe_allow_html=True)
 
-if dark_mode:
-    st.markdown(
-        "<style>[data-testid='stAppViewContainer'],[data-testid='stSidebar']{background:#171b24;color:#edf0f6}[data-testid='stHeader']{background:transparent}</style>",
-        unsafe_allow_html=True,
-    )
+apply_theme(dark_mode)
 
 try:
     health = api_request("GET", "/health")
