@@ -235,9 +235,9 @@ def show_run_detail(run: dict[str, Any], key_prefix: str = "detail") -> None:
         if analysis:
             if analysis.get("status") == "completed":
                 st.success("Gemini analysis complete")
+                st.markdown(analysis.get("content", "No analysis content was returned."))
             else:
-                st.warning("Gemini is disabled because GEMINI_API_KEY is missing. Add it to backend/.env and restart the backend. Test results and reports still work without it.")
-            st.markdown(analysis.get("content", "No analysis content was returned."))
+                st.warning("Gemini is disabled. Add GEMINI_API_KEY to backend/.env and restart the backend. Test reports still work without it.")
         analysis_error = st.session_state.get(f"analysis-error-{run['id']}")
         if analysis_error:
             st.warning(analysis_error)
