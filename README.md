@@ -157,3 +157,5 @@ No screenshots have been captured yet. Add dashboard, run-detail and mobile scre
 - Structured AI diagnosis and human-approved, isolated patch preview plus verified application.
 - Persistent rate limiting, observability, audit log retention and more database migration coverage.
 - CI workflow, accessibility audit and visual regression coverage.
+
+
