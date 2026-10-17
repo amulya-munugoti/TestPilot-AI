@@ -33,23 +33,26 @@ def apply_theme(dark: bool) -> None:
     if dark:
         page_bg, panel_bg, text, muted, border, sidebar = "#101827", "#182335", "#edf3fb", "#9aa9bd", "#2b3a50", "#0c1421"
         input_bg = "#111c2c"
+        ai_bg, ai_text, ai_border = "#342b18", "#f3e2b5", "#564522"
     else:
         page_bg, panel_bg, text, muted, border, sidebar = "#f5f7fb", "#ffffff", "#172033", "#69758a", "#e5eaf2", "#111c32"
         input_bg = "#ffffff"
+        ai_bg, ai_text, ai_border = "#fff9e8", "#624a12", "#f2dea3"
     st.markdown(
         f"""
         <style>
-        :root {{ --tp-bg:{page_bg}; --tp-panel:{panel_bg}; --tp-text:{text}; --tp-muted:{muted}; --tp-border:{border}; --tp-sidebar:{sidebar}; }}
+        :root {{ --tp-bg:{page_bg}; --tp-panel:{panel_bg}; --tp-text:{text}; --tp-muted:{muted}; --tp-border:{border}; --tp-sidebar:{sidebar}; --tp-ai-bg:{ai_bg}; --tp-ai-text:{ai_text}; --tp-ai-border:{ai_border}; }}
         body,[data-testid="stAppViewContainer"] {{ background:var(--tp-bg); color:var(--tp-text); }}
         [data-testid="stMarkdownContainer"],[data-testid="stText"] {{ color:var(--tp-text); }}
         [data-testid="stHeader"] {{ background:transparent; }}
         [data-testid="stMain"] .block-container {{ max-width:1240px; padding:2rem 3rem 4rem; }}
-        [data-testid="stSidebar"] {{ background:var(--tp-sidebar); border-right:1px solid rgba(255,255,255,.07); }}
+        [data-testid="stSidebar"] {{ background:var(--tp-sidebar); border-right:1px solid rgba(255,255,255,.07); width:270px !important; min-width:270px !important; }}
         [data-testid="stSidebar"] * {{ color:#e8eef8; }}
-        [data-testid="stSidebar"] [data-testid="stRadio"] label {{ border-radius:10px; padding:.48rem .6rem; transition:background .15s ease; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] label {{ border-radius:9px; padding:.48rem .65rem; transition:background .15s ease; margin:.1rem 0; }}
         [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {{ background:rgba(255,255,255,.07); }}
         [data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {{ background:rgba(111,137,255,.2); outline:1px solid rgba(145,167,255,.22); }}
-        [data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"] {{ display:none; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child {{ display:none !important; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"] {{ display:none !important; }}
         h1,h2,h3 {{ color:var(--tp-text); letter-spacing:-.035em; }}
         h1 {{ font-size:2rem !important; font-weight:700 !important; margin-bottom:.25rem !important; }}
         h2 {{ font-size:1.25rem !important; font-weight:650 !important; margin-top:1.6rem !important; }}
@@ -60,9 +63,11 @@ def apply_theme(dark: bool) -> None:
         [data-testid="stExpander"] {{ background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:12px; }}
         [data-testid="stVerticalBlockBorderWrapper"] {{ background:var(--tp-panel); border-color:var(--tp-border) !important; border-radius:14px; }}
         [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stSelectbox"] [data-baseweb="select"] > div {{ background:{input_bg}; border-color:var(--tp-border); border-radius:9px; }}
-        [data-testid="stButton"] button,[data-testid="stDownloadButton"] button {{ border-radius:9px; font-weight:600; min-height:2.55rem; }}
-        [data-testid="stButton"] button[kind="primary"] {{ background:#536dfc; color:white; border:1px solid #536dfc; box-shadow:0 5px 15px rgba(83,109,252,.28); }}
-        [data-testid="stButton"] button[kind="primary"]:hover {{ background:#4058e8; border-color:#4058e8; }}
+        [data-testid="stButton"] > button,[data-testid="stDownloadButton"] > button,[data-testid="stFormSubmitButton"] > button {{ border-radius:9px !important; font-weight:600 !important; min-height:2.55rem; background:var(--tp-panel) !important; color:var(--tp-text) !important; border:1px solid var(--tp-border) !important; box-shadow:none !important; }}
+        [data-testid="stButton"] > button:hover,[data-testid="stDownloadButton"] > button:hover,[data-testid="stFormSubmitButton"] > button:hover {{ background:rgba(83,109,252,.08) !important; border-color:#8395f7 !important; color:var(--tp-text) !important; }}
+        [data-testid="stButton"] > button[kind="primary"],[data-testid="stButton"] > button[data-testid="stBaseButton-primary"],[data-testid="stFormSubmitButton"] > button[kind="primary"],[data-testid="stFormSubmitButton"] > button[data-testid="stBaseButton-primary"] {{ background:#536dfc !important; color:#fff !important; border:1px solid #536dfc !important; box-shadow:0 4px 11px rgba(83,109,252,.2) !important; }}
+        [data-testid="stButton"] > button[kind="primary"]:hover,[data-testid="stButton"] > button[data-testid="stBaseButton-primary"]:hover,[data-testid="stFormSubmitButton"] > button[kind="primary"]:hover,[data-testid="stFormSubmitButton"] > button[data-testid="stBaseButton-primary"]:hover {{ background:#4058e8 !important; border-color:#4058e8 !important; color:#fff !important; }}
+        [data-testid="stButton"] > button:disabled,[data-testid="stDownloadButton"] > button:disabled {{ background:#eef1f6 !important; color:#8993a5 !important; border-color:#e2e6ed !important; }}
         [data-testid="stAlert"] {{ border-radius:11px; }}
         .tp-kicker {{ color:#5679d8; font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; font-weight:700; margin-bottom:.25rem; }}
         .tp-sidebar-brand {{ font-size:1.08rem; font-weight:750; letter-spacing:-.035em; margin:.3rem 0 0; display:flex; align-items:center; }}
@@ -87,6 +92,7 @@ def apply_theme(dark: bool) -> None:
         .tp-status-error {{ background:#fff4df; color:#986500; }}
         .tp-sidebar-note {{ color:#9eacc2 !important; font-size:.78rem; line-height:1.5; }}
         .tp-section-note {{ color:var(--tp-muted); margin-top:-.6rem; margin-bottom:1rem; }}
+        .tp-ai-notice {{ background:var(--tp-ai-bg); color:var(--tp-ai-text); border:1px solid var(--tp-ai-border); border-radius:10px; padding:.72rem .9rem; font-size:.88rem; line-height:1.45; margin:.65rem 0; }}
         .tp-connection {{ display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .62rem; border-radius:99px; font-size:.76rem; font-weight:650; background:rgba(255,255,255,.09); color:#e4eaff; }}
         .tp-dot {{ display:inline-block; width:.45rem; height:.45rem; border-radius:50%; background:#65d69a; }}
         [data-testid="stSidebar"] [data-testid="stRadio"] {{ margin-top:.35rem; }}
@@ -94,7 +100,7 @@ def apply_theme(dark: bool) -> None:
         [data-testid="stSidebar"] hr {{ border-color:rgba(255,255,255,.12); }}
         [data-testid="stMain"] [data-testid="stSubheader"] {{ margin-top:1.6rem; }}
         [data-testid="stExpander"] summary {{ font-weight:600; }}
-        @media (max-width: 800px) {{ [data-testid="stMain"] .block-container {{ padding:1.4rem 1rem 3rem; }} h1 {{ font-size:1.7rem !important; }} }}
+        @media (max-width: 800px) {{ [data-testid="stSidebar"] {{ width: min(270px, 82vw) !important; min-width: min(270px, 82vw) !important; }} [data-testid="stMain"] .block-container {{ padding:1.4rem 1rem 3rem; }} h1 {{ font-size:1.7rem !important; }} }}
         </style>
         """,
         unsafe_allow_html=True,
@@ -201,7 +207,7 @@ def show_run_detail(run: dict[str, Any], key_prefix: str = "detail") -> None:
     ):
         column.metric(label, value)
 
-    with st.expander("What Pytest printed", expanded=bool(has_issues)):
+    with st.expander("Raw test output", expanded=False):
         st.code(run.get("output") or "No output was recorded.", language="text", wrap_lines=True)
 
     report = None
@@ -244,7 +250,11 @@ def show_run_detail(run: dict[str, Any], key_prefix: str = "detail") -> None:
                 st.success("Gemini analysis complete")
                 st.markdown(analysis.get("content", "No analysis content was returned."))
             else:
-                st.warning(analysis.get("content") or "Gemini could not complete this request. Check the Settings page for connection details.")
+                message = analysis.get("content") or "Gemini could not complete this request. Check the Settings page for connection details."
+                st.markdown(
+                    f'<div class="tp-ai-notice"><strong>Gemini unavailable</strong><br>{html.escape(message)}</div>',
+                    unsafe_allow_html=True,
+                )
         analysis_error = st.session_state.get(f"analysis-error-{run['id']}")
         if analysis_error:
             st.warning(analysis_error)
