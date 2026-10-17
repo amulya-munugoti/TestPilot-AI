@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -10,6 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
+from dotenv import load_dotenv
+
+# Load backend settings from the project location, regardless of the directory
+# from which Uvicorn was started. Existing process environment still wins.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 from .ai import analyze_failure
 from .database import Base, engine, get_db, SessionLocal
@@ -49,7 +55,7 @@ def visible_run(run: TestRun) -> RunOut:
 
 @app.middleware("http")
 async def limit_sensitive_requests(request: Request, call_next):
-    if request.method == "POST" and ("test-runs" in request.url.path):
+    if request.method == "POST" and ("test-runs" in request.url.path or request.url.path.endswith("/settings/gemini-test")):
         address = request.client.host if request.client else "unknown"
         key = (address, request.url.path.rsplit("/", 1)[-1] if request.url.path.endswith(("/analyze", "/generate-tests")) else "run")
         now = time.monotonic()
@@ -68,7 +74,7 @@ async def limit_sensitive_requests(request: Request, call_next):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "ai_configured": bool(os.getenv("GEMINI_API_KEY")), "demo_mode": True}
+    return {"status": "ok", "ai_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()), "demo_mode": True}
 
 
 @app.get("/api/dashboard")
@@ -182,5 +188,40 @@ def report(run_id: int, db: Session = Depends(get_db)):
 
 @app.get("/api/settings")
 def settings():
-    return {"ai_configured": bool(os.getenv("GEMINI_API_KEY")), "ai_model": os.getenv("AI_MODEL", "gemini-3.8-flash"), "demo_mode": True}
+    return {"ai_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()), "ai_model": os.getenv("AI_MODEL", "gemini-3.8-flash"), "demo_mode": True}
+
+
+@app.post("/api/settings/gemini-test")
+async def test_gemini_connection():
+    """Make a small provider request so Settings can distinguish a key from a working connection."""
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    model = os.getenv("AI_MODEL", "gemini-3.8-flash").strip()
+    if not api_key:
+        return {"status": "not_configured", "message": "No Gemini API key is configured on the backend."}
+
+    try:
+        from google import genai
+
+        client = genai.Client(api_key=api_key)
+        response = await asyncio.wait_for(
+            client.aio.models.generate_content(model=model, contents="Reply with OK."),
+            timeout=20,
+        )
+        if not (response.text or "").strip():
+            return {"status": "error", "message": "Gemini responded without text. Check the selected model."}
+        return {"status": "connected", "message": "Gemini connection verified.", "model": model}
+    except Exception as exc:
+        # Surface useful provider guidance without returning request data or credentials.
+        detail = str(exc).lower()
+        if "429" in detail or "quota" in detail or "resource_exhausted" in detail:
+            message = "Gemini rejected the request because the project quota or rate limit is exhausted."
+        elif "401" in detail or "403" in detail or "api key" in detail or "permission" in detail:
+            message = "Gemini rejected the API key or the key does not have access to this model."
+        elif "404" in detail or "not found" in detail:
+            message = f"The model '{model}' is unavailable to this API key. Check AI_MODEL and model access."
+        elif isinstance(exc, asyncio.TimeoutError):
+            message = "Gemini did not respond within 20 seconds. Try again shortly."
+        else:
+            message = "Gemini could not be reached. Check backend network access and try again."
+        return {"status": "error", "message": message}
 

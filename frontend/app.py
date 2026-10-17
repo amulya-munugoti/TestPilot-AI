@@ -43,7 +43,7 @@ def apply_theme(dark: bool) -> None:
         body,[data-testid="stAppViewContainer"] {{ background:var(--tp-bg); color:var(--tp-text); }}
         [data-testid="stMarkdownContainer"],[data-testid="stText"] {{ color:var(--tp-text); }}
         [data-testid="stHeader"] {{ background:transparent; }}
-        [data-testid="stMain"] .block-container {{ max-width:1320px; padding:2rem 3rem 4rem; }}
+        [data-testid="stMain"] .block-container {{ max-width:1240px; padding:2rem 3rem 4rem; }}
         [data-testid="stSidebar"] {{ background:var(--tp-sidebar); border-right:1px solid rgba(255,255,255,.07); }}
         [data-testid="stSidebar"] * {{ color:#e8eef8; }}
         [data-testid="stSidebar"] [data-testid="stRadio"] label {{ border-radius:10px; padding:.48rem .6rem; transition:background .15s ease; }}
@@ -54,7 +54,7 @@ def apply_theme(dark: bool) -> None:
         h1 {{ font-size:2rem !important; font-weight:700 !important; margin-bottom:.25rem !important; }}
         h2 {{ font-size:1.25rem !important; font-weight:650 !important; margin-top:1.6rem !important; }}
         [data-testid="stCaptionContainer"] {{ color:var(--tp-muted); }}
-        [data-testid="stMetric"] {{ background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:15px; padding:1rem 1.15rem; box-shadow:0 4px 14px rgba(24,39,75,.045); }}
+        [data-testid="stMetric"] {{ background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:13px; padding:.9rem 1.05rem; box-shadow:0 2px 8px rgba(24,39,75,.035); }}
         [data-testid="stMetricLabel"] {{ color:var(--tp-muted); font-size:.83rem; }}
         [data-testid="stMetricValue"] {{ color:var(--tp-text); font-size:1.8rem; font-weight:700; }}
         [data-testid="stExpander"] {{ background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:12px; }}
@@ -71,10 +71,10 @@ def apply_theme(dark: bool) -> None:
         .tp-hero-kicker {{ color:#aebcff; font-size:.72rem; text-transform:uppercase; letter-spacing:.15em; font-weight:750; margin-bottom:.6rem; }}
         .tp-hero-title {{ color:#fff; font-size:1.9rem; line-height:1.15; letter-spacing:-.045em; font-weight:750; margin-bottom:.55rem; }}
         .tp-hero-copy {{ color:#c6d0e2; font-size:.93rem; line-height:1.6; max-width:760px; }}
-        .st-key-tp-hero {{ background:linear-gradient(115deg,#172744 0%,#233d70 58%,#334e8c 100%); border-radius:20px; padding:1.4rem 1.5rem; box-shadow:0 12px 28px rgba(30,51,91,.16); }}
+        .st-key-tp-hero {{ background:linear-gradient(115deg,#172744 0%,#233d70 58%,#334e8c 100%); border-radius:18px; padding:1.35rem 1.5rem; box-shadow:0 8px 20px rgba(30,51,91,.12); margin-bottom:1.25rem; }}
         .st-key-tp-hero [data-testid="stButton"] {{ padding-top:.6rem; }}
         .tp-step-number {{ color:#536dfc; font-size:.7rem; letter-spacing:.12em; font-weight:800; text-transform:uppercase; margin-bottom:.5rem; }}
-        .tp-step-card {{ height:100%; background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:14px; padding:1rem 1.1rem; box-shadow:0 3px 12px rgba(24,39,75,.035); }}
+        .tp-step-card {{ height:100%; background:var(--tp-panel); border:1px solid var(--tp-border); border-radius:12px; padding:.9rem 1rem; color:var(--tp-muted); font-size:.9rem; line-height:1.5; }}
         .tp-table-scroll {{ width:100%; overflow-x:auto; border:1px solid var(--tp-border); border-radius:14px; background:var(--tp-panel); }}
         .tp-run-table {{ border-collapse:collapse; min-width:720px; width:100%; font-size:.84rem; }}
         .tp-run-table th {{ color:var(--tp-muted); text-align:left; padding:.85rem .9rem; font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; border-bottom:1px solid var(--tp-border); background:rgba(110,128,160,.05); }}
@@ -87,6 +87,13 @@ def apply_theme(dark: bool) -> None:
         .tp-status-error {{ background:#fff4df; color:#986500; }}
         .tp-sidebar-note {{ color:#9eacc2 !important; font-size:.78rem; line-height:1.5; }}
         .tp-section-note {{ color:var(--tp-muted); margin-top:-.6rem; margin-bottom:1rem; }}
+        .tp-connection {{ display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .62rem; border-radius:99px; font-size:.76rem; font-weight:650; background:rgba(255,255,255,.09); color:#e4eaff; }}
+        .tp-dot {{ display:inline-block; width:.45rem; height:.45rem; border-radius:50%; background:#65d69a; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] {{ margin-top:.35rem; }}
+        [data-testid="stSidebar"] [data-testid="stRadio"] label {{ margin-bottom:.12rem; }}
+        [data-testid="stSidebar"] hr {{ border-color:rgba(255,255,255,.12); }}
+        [data-testid="stMain"] [data-testid="stSubheader"] {{ margin-top:1.6rem; }}
+        [data-testid="stExpander"] summary {{ font-weight:600; }}
         @media (max-width: 800px) {{ [data-testid="stMain"] .block-container {{ padding:1.4rem 1rem 3rem; }} h1 {{ font-size:1.7rem !important; }} }}
         </style>
         """,
@@ -237,7 +244,7 @@ def show_run_detail(run: dict[str, Any], key_prefix: str = "detail") -> None:
                 st.success("Gemini analysis complete")
                 st.markdown(analysis.get("content", "No analysis content was returned."))
             else:
-                st.warning("Gemini is disabled. Add GEMINI_API_KEY to backend/.env and restart the backend. Test reports still work without it.")
+                st.warning(analysis.get("content") or "Gemini could not complete this request. Check the Settings page for connection details.")
         analysis_error = st.session_state.get(f"analysis-error-{run['id']}")
         if analysis_error:
             st.warning(analysis_error)
@@ -270,23 +277,6 @@ def dashboard() -> None:
     metrics[2].metric("Failed tests", data["failed_tests"])
     metrics[3].metric("Pass rate", f"{data['pass_rate']}%")
 
-    st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-    steps = st.columns(3, gap="medium")
-    for column, title, detail in zip(
-        steps,
-        ("01 · Execute", "02 · Inspect", "03 · Get insight"),
-        (
-            "Runs the fixed two-check Python demo suite.",
-            "See saved pass/fail counts and the real Pytest traceback.",
-            "If Gemini is configured, request a plain-language explanation. AI never changes the test result.",
-        ),
-    ):
-        with column:
-            st.markdown(
-                f'<div class="tp-step-card"><div class="tp-step-number">{title}</div><div>{html.escape(detail)}</div></div>',
-                unsafe_allow_html=True,
-            )
-
     if run_clicked:
         try:
             projects = api_request("GET", "/projects")
@@ -302,22 +292,23 @@ def dashboard() -> None:
         except ApiError as exc:
             show_api_error(exc)
 
-    st.subheader("Recent test runs")
-    run_table(data.get("recent_runs", []))
-    st.subheader("Failed runs to inspect")
     bugs = data.get("recent_bugs", [])
     latest_run_id = st.session_state.pop("latest-run-id", None)
-    if bugs:
-        for run in bugs:
-            counts = display_counts(run)
-            issue_count = counts["failed"] + counts["errors"]
-            with st.expander(
-                f"Run #{run['id']} · {issue_count} failing check(s) · {format_time(run.get('created_at'))}",
-                expanded=run["id"] == latest_run_id,
-            ):
-                show_run_detail(run, "dashboard")
-    else:
-        st.info("No failing runs yet. Run the demo suite to see its intentional failure and the captured traceback.")
+    recent_tab, failures_tab = st.tabs(["Recent runs", f"Failures to inspect ({len(bugs)})"])
+    with recent_tab:
+        run_table(data.get("recent_runs", []))
+    with failures_tab:
+        if bugs:
+            for run in bugs:
+                counts = display_counts(run)
+                issue_count = counts["failed"] + counts["errors"]
+                with st.expander(
+                    f"Run #{run['id']} · {issue_count} failing check(s) · {format_time(run.get('created_at'))}",
+                    expanded=run["id"] == latest_run_id,
+                ):
+                    show_run_detail(run, "dashboard")
+        else:
+            st.info("No failing runs yet. Run the demo suite to create your first report.")
 
 
 def projects_page() -> None:
@@ -400,17 +391,31 @@ def history_page() -> None:
 
 def settings_page() -> None:
     page_header("Workspace / Configuration", "Settings", "Check the API connection and review the demo configuration.")
-    st.code(API_BASE, language="text")
     try:
         settings = api_request("GET", "/settings")
-        st.success("Backend API connected")
+        with st.container(border=True):
+            st.subheader("Service connections")
+            st.success("TestPilot API is connected")
+            st.caption(f"API endpoint: {API_BASE}")
         if settings["ai_configured"]:
-            st.write("Gemini: Configured")
+            st.info("A Gemini key is configured. Run a connection check to verify that the key, model, and quota are working.")
         else:
-            st.warning("Gemini analysis is disabled until you add a key to backend/.env and restart the backend.")
+            st.warning("Gemini is not configured on the backend yet. Add your key to backend/.env, then restart the API.")
             st.code("GEMINI_API_KEY=your-gemini-api-key", language="text")
-        st.write(f"Model: `{settings['ai_model']}`")
-        st.write("Execution mode: controlled public demo")
+        st.caption(f"Model: {settings['ai_model']}  ·  Execution mode: controlled public demo")
+        if st.button("Test Gemini connection", type="primary", disabled=not settings["ai_configured"]):
+            with st.spinner("Checking Gemini access…"):
+                try:
+                    result = api_request("POST", "/settings/gemini-test")
+                    st.session_state["gemini-connection-result"] = result
+                except ApiError as exc:
+                    st.session_state["gemini-connection-result"] = {"status": "error", "message": str(exc)}
+        connection_result = st.session_state.get("gemini-connection-result")
+        if connection_result:
+            if connection_result["status"] == "connected":
+                st.success(f"{connection_result['message']} Model: {connection_result.get('model', settings['ai_model'])}")
+            else:
+                st.error(connection_result["message"])
     except ApiError as exc:
         show_api_error(exc)
     st.divider()
@@ -440,9 +445,9 @@ apply_theme(dark_mode)
 
 try:
     health = api_request("GET", "/health")
-    st.sidebar.caption("API: connected")
+    st.sidebar.markdown('<span class="tp-connection"><span class="tp-dot"></span>API connected</span>', unsafe_allow_html=True)
 except ApiError:
-    st.sidebar.caption("API: unavailable")
+    st.sidebar.markdown('<span class="tp-connection">API unavailable</span>', unsafe_allow_html=True)
 
 if page == "Overview":
     dashboard()
