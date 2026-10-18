@@ -159,3 +159,4 @@ No screenshots have been captured yet. Add dashboard, run-detail and mobile scre
 - CI workflow, accessibility audit and visual regression coverage.
 
 
+ALL RIGHTS RESERVED BY AMULYA MUNUGOTI
