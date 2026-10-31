@@ -1,51 +1,151 @@
-# TestPilot AI — Intelligent Bug Detection and AI-Powered Test Analysis Platform
+<div align="center">
 
-TestPilot AI is a Python-first project for running automated tests, understanding failures and keeping a clear test history. It combines a **Streamlit dashboard**, a **FastAPI backend**, **Pytest**, SQLAlchemy persistence and optional **Gemini** failure analysis.
+# 🧪 TestPilot AI
+### AI-Powered Test Analysis Platform
 
-## Project overview
+**Find failures. Understand errors. Improve your testing workflow.**
 
-When a developer runs the bundled sample suite, TestPilot records the real Pytest result, execution time and traceback. The dashboard presents run statistics and history. If Gemini is configured, a visitor can ask it to explain a failure in beginner-friendly language or suggest additional tests. AI output is clearly labelled and never changes the actual test result.
+A Python-powered testing dashboard that runs a controlled Pytest suite, records test history, and can use AI to explain failures in beginner-friendly language.
 
-The project is designed as an internship portfolio demo: it demonstrates Python web development, REST APIs, database persistence, test automation, optional AI integration and safe handling of test execution. The public demo runs only a reviewed sample suite; it does not accept or execute visitor-uploaded code.
+<br/>
 
-**Current deployment status:** prepared for deployment, but not deployed. No public demo URL is available yet.
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
 
-**Public demo safety:** project records are metadata. Test execution is pinned to `backend/sample_project`; visitors cannot submit code, commands, or paths. The demo has no login or per-visitor isolation, so do not put private information in it. AI suggestions can be reviewed and exported, but the shared public app does not apply file changes.
+<br/>
 
-## Architecture
+![Status](https://img.shields.io/badge/Status-Prepared%20for%20Deployment-orange?style=flat-square)
+![AI](https://img.shields.io/badge/AI-Gemini%20Optional-8E75B2?style=flat-square)
+![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-lightgrey?style=flat-square)
 
-- `frontend/app.py`: Streamlit UI written in Python. It provides the dashboard, project management, test history, run detail, settings and dark appearance toggle.
-- `backend/app/`: FastAPI REST API, SQLAlchemy 2 models, controlled subprocess runner, optional Google GenAI client, CORS and simple in-memory request limits.
-- `backend/migrations/`: Alembic configuration and initial schema migration.
-- `backend/sample_project/`: two genuine Pytest cases: one passes and one intentionally fails to make a traceback visible.
-- Local persistence defaults to SQLite. Set `DATABASE_URL` to a PostgreSQL SQLAlchemy URL for hosted deployments.
+</div>
 
-## Language choice
+---
 
-Python is the only application language maintained in this project: FastAPI handles the API and test execution, while Streamlit renders the dashboard and calls that API with Python. There are no JavaScript or TypeScript app files or Node build steps. The remaining non-Python files are configuration, dependency lists and this documentation; Streamlit supplies its own browser interface.
+## 🌟 Overview
 
-## Features
+**TestPilot AI** brings test execution, failure inspection, and AI-assisted explanations into one simple workflow.
 
-- Real dashboard metrics and recent run/bug reports, loaded from API records.
-- Create, view and delete project metadata. The sample project is protected.
-- Run the bundled suite with Pytest; store pass/fail/skip/error counts, duration and capped output.
-- Inspect history, tracebacks and AI analyses; export a run as JSON.
-- Optional Gemini failure analysis and test suggestions. AI unavailable/quota errors are reported as unavailable; they never change test results.
-- Settings show whether a key is configured without returning the key.
-- Safe execution uses an argument list, fixed server-side path, timeout and 20 KB output cap. Sensitive-looking values are redacted from AI prompts.
+Run the bundled sample tests, review actual results and tracebacks, explore previous runs, and optionally ask Gemini to explain a failure or suggest additional tests.
 
-## Requirements
+> [!IMPORTANT]
+> **Project status:** Prepared for deployment; no public demo URL is available yet.  
+> **Safe execution scope:** The app runs the bundled sample test suite only. It does not accept or execute visitor-uploaded code.
 
-- Windows 10/11, Git and Python 3.12.
-- Python 3.12 recommended for the smoothest compatibility across dependencies. The pasted brief reported Python 3.14.4, but Python was not available on PATH in the inspected shell. Recent FastAPI, SQLAlchemy, pytest and Google GenAI support newer Python releases; if you use 3.14 and installation fails for a compiled dependency, use Python 3.12.
-- PostgreSQL is optional locally; SQLite starts without a database server.
+## ✨ Features
 
-## Local setup (Windows PowerShell)
+<table>
+<tr>
+<td width="50%">
 
-Run these commands from the project root. The root `requirements.txt` includes the backend and Streamlit UI dependencies, so one virtual environment is enough:
+### 🚀 Test Execution
+Run the bundled Pytest suite and capture pass, fail, skip, and error counts.
+
+</td>
+<td width="50%">
+
+### 🧠 AI Failure Analysis
+Optionally use Gemini to explain tracebacks and suggest additional tests.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📊 Dashboard
+Review summary metrics, recent activity, and test-run details.
+
+</td>
+<td width="50%">
+
+### 🕘 Test History
+Keep test-run records and inspect previous results and tracebacks.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📄 Exportable Reports
+Export individual test-run details as JSON.
+
+</td>
+<td width="50%">
+
+### 🛡️ Controlled Execution
+Use a fixed sample-project path, timeout, output cap, and basic rate limiting.
+
+</td>
+</tr>
+</table>
+
+**Note:** AI analysis is optional. AI-generated explanations and suggestions are advisory, not verified fixes, and do not change the actual Pytest result.
+
+## 🧰 Tech Stack
+
+| Component | Technology |
+|:--|:--|
+| Language | Python |
+| Dashboard | Streamlit |
+| REST API | FastAPI |
+| Test automation | Pytest |
+| Database / ORM | SQLite, SQLAlchemy |
+| Migrations | Alembic |
+| Optional AI integration | Google Gemini API |
+
+## 🔍 How It Works
+
+```mermaid
+flowchart TD
+    A[Streamlit Dashboard] --> B[FastAPI Backend]
+    B --> C[Controlled Pytest Sample Suite]
+    C --> D[Capture Results and Tracebacks]
+    D --> E[(SQLite / PostgreSQL)]
+    D --> F[Run History and Reports]
+    D -. Optional .-> G[Gemini Failure Analysis]
+    G --> H[Explanation and Test Suggestions]
+```
+
+1. Launch the API and dashboard.
+2. Run the bundled sample test suite.
+3. TestPilot records results, duration, and output.
+4. Review the run history and traceback.
+5. If Gemini is configured, request an explanation or additional test ideas.
+
+The sample suite contains a passing test and an intentionally failing test so you can inspect a real failure and traceback.
+
+## 📁 Project Structure
+
+```text
+TestPilot AI/
+├── backend/
+│   ├── app/               # FastAPI application and routes
+│   ├── migrations/        # Alembic migrations
+│   ├── sample_project/    # Controlled Pytest sample suite
+│   └── tests/             # Backend tests
+├── frontend/
+│   └── app.py             # Streamlit dashboard
+├── requirements.txt
+├── render.yaml
+└── README.md
+```
+
+## ⚙️ Getting Started
+
+### Requirements
+
+- Windows 10/11
+- Git
+- Python 3.12 recommended
+
+### 1. Set up the environment
+
+Run from the project root in PowerShell:
 
 ```powershell
-py -3.12 --version
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -54,110 +154,88 @@ Copy-Item .\backend\.env.example .\backend\.env
 Copy-Item .\frontend\.env.example .\frontend\.env
 ```
 
-If `py -3.12` is unavailable, install Python 3.12 from [python.org](https://www.python.org/downloads/windows/) and ensure the Python Launcher is included. If your root `.venv` already exists and is activated, you can simply run `pip install -r requirements.txt` from the project root.
+### 2. Start the backend
 
-The copied `.env` already selects local SQLite. You can leave `GEMINI_API_KEY` blank; the core app runs without AI. To use Gemini, create a key in Google AI Studio and enter it privately in `backend/.env`. Never paste it into frontend variables, source code, screenshots, GitHub, or chat. Keep `AI_MODEL=gemini-3.8-flash` unless your AI Studio account shows a different free-eligible model. The default model is listed with free standard input/output pricing today; per-project quotas vary, and free-tier prompt data may be used to improve Google's products. Do not send private source code or sensitive logs.
-
-In the first PowerShell window, run the backend from its directory:
+Open a PowerShell terminal at the project root:
 
 ```powershell
 Set-Location .\backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The API creates local tables and seeds `TestPilot Sample` at startup. Interactive API docs are at `http://127.0.0.1:8000/docs`.
+API documentation: **http://127.0.0.1:8000/docs**
 
-In a second PowerShell window, activate the same root environment, then start the UI:
+### 3. Start the dashboard
+
+Open a **second** PowerShell terminal at the project root:
 
 ```powershell
-Set-Location 'C:\Users\Amulya\Desktop\TestPilot AI'
 .\.venv\Scripts\Activate.ps1
 Set-Location .\frontend
 python -m streamlit run app.py
 ```
 
-Open `http://localhost:8501`. `TESTPILOT_API_URL` defaults to `http://127.0.0.1:8000/api` and can be changed in `frontend/.env`.
+Open **http://localhost:8501** in your browser.
 
-## Database and migrations
+The dashboard uses `TESTPILOT_API_URL`, which defaults to `http://127.0.0.1:8000/api`.
 
-SQLite is used by default for local learning. Create the schema via Alembic when you want to exercise migrations:
+### 4. Enable AI analysis (optional)
 
-```powershell
-Set-Location .\backend
-alembic upgrade head
-```
+TestPilot works without an AI key. To enable Gemini, add `GEMINI_API_KEY` privately to `backend/.env` and set `AI_MODEL` to a model available to your account.
 
-The API also calls `create_all()` at startup to make first-run local setup straightforward. For PostgreSQL, create a database and set `DATABASE_URL` in the backend environment, for example:
+🔐 **Never commit API keys or put them in frontend environment variables.**
 
-```text
-postgresql+psycopg://USER:PASSWORD@HOST/DBNAME?sslmode=require
-```
+## 🧪 Run Tests
 
-Install the PostgreSQL driver before using that URL (`pip install psycopg[binary]`), then run `alembic upgrade head`. Keep the database URL private and URL-encode reserved password characters.
-
-## Tests and build
-
-From the project root (with the virtual environment active):
+With the virtual environment active, run from the project root:
 
 ```powershell
 python -m pytest .\backend\tests
 ```
 
-Tests cover health/settings, validation and project CRUD, rejecting non-sample execution, a real sample run and traceback, dashboard/history/report persistence, AI-unconfigured behavior, mocked AI responses, analysis validation, and secret redaction. They make no Gemini network call.
-
-To check the Streamlit file syntax, run from the project root:
+Check the dashboard file syntax:
 
 ```powershell
 python -m compileall -q .\frontend\app.py
 ```
 
-## Deploy for a free demo
+## ☁️ Deployment
 
-The included `render.yaml` describes two Python web services: the FastAPI backend and the Streamlit UI. Connect the repository in Render and deploy the blueprint; both services use the free plan. Create a Neon free PostgreSQL project (or another PostgreSQL host) and set backend `DATABASE_URL` to its SSL URL. Set the UI service's `TESTPILOT_API_URL` to the backend URL plus `/api`. Set `GEMINI_API_KEY` privately on the backend only, and leave it blank if you do not want AI. The Streamlit UI calls FastAPI from its Python server, so browser CORS is not used for those UI requests.
+A Render blueprint is included in `render.yaml` for the backend and Streamlit dashboard. The project is **not yet deployed publicly**.
 
-Deployment checklist:
+Before deploying:
 
-1. Push this workspace to a GitHub repository you control.
-2. Create the Neon Free database; copy its PostgreSQL connection string without sharing it.
-3. In Render, create the two Python services from `render.yaml`.
-4. Set backend `DATABASE_URL`, `FRONTEND_ORIGIN`, `APP_ENV=production`, and optionally `GEMINI_API_KEY` in the provider dashboard. Keep `AI_MODEL=gemini-3.8-flash`.
-5. Set the UI's `TESTPILOT_API_URL=https://YOUR-API.onrender.com/api` and deploy both services.
-6. Confirm `/api/health`, open the Streamlit UI, run the bundled tests, inspect the real failure and export a JSON report.
+1. Configure a persistent PostgreSQL database for hosted history.
+2. Set the backend environment variables in the hosting provider.
+3. Set the dashboard's `TESTPILOT_API_URL` to the deployed API URL plus `/api`.
+4. Deploy both services and verify the health endpoint and sample test run.
 
-The Render free web service sleeps after 15 minutes idle and its filesystem is ephemeral, so SQLite is not suitable for hosted history. Expect a cold start after sleep. Free service-hours, bandwidth and build limits apply; do not enable billing or add a payment method for this project. Neon currently lists 1 GB storage and 100 compute-hours per project per month on Free, scaling compute to zero while idle; quotas and policies can change. Free services are suitable for a portfolio demo, not a production availability guarantee. The Gemini API free tier has model and rate limits that may be quota exhausted; AI gracefully becomes unavailable. Its current free tier may use submitted content to improve Google's products.
+Review current hosting-provider limits before deployment. Hosted filesystems may be ephemeral, so SQLite should not be relied on for persistent hosted history.
 
-## Security and limits
+## 🔒 Security & Limitations
 
-- Do not advertise this as unrestricted code execution. No uploads, arbitrary paths, or shell commands are accepted.
-- Run execution is limited to the controlled sample and configured timeout (default 20 seconds); output is capped at 20 KB.
-- Public write/AI execution endpoints use a small process-local rate limit. This is a demo safeguard, not a substitute for authentication or a distributed API gateway.
-- The demo has no sign-in, tenant isolation, or abuse-proofing. Do not expose it as a shared source-code analysis service.
-- AI requests only contain the sample traceback in this demo, are capped and redacted; credentials and private code should never be submitted.
-- AI suggestions are explanatory text, not verified patches. Review any change manually. Patch preview/application and automatic fix verification are not enabled in the public shared workspace.
-- Do not put secrets in `.env.example`; keep real values in provider secret settings and local ignored `.env` files.
+- Only the bundled sample suite is executed; arbitrary commands, paths, and uploaded code are not accepted.
+- Test execution has a configured timeout and output cap.
+- Rate limiting is process-local and is only a basic demo safeguard.
+- The current demo has no authentication or per-user workspace isolation.
+- AI output is advisory text, not a verified patch.
+- Do not submit private source code, credentials, or sensitive logs.
 
-## Troubleshooting
+## 🛣️ Future Improvements
 
-- **`python`/`py` not found:** install Python 3.12 and reopen PowerShell. Check `py -0p` for installed versions.
-- **Pytest could not start:** activate `backend/.venv` and run `pip install -r requirements.txt`.
-- **UI cannot reach the API:** start Uvicorn, confirm backend health, and check `TESTPILOT_API_URL` in `frontend/.env`.
-- **Dashboard shows no data:** start the API. A fresh SQLite file seeds the sample project; metrics stay zero until you run it.
-- **Gemini unavailable:** verify the private backend key, model access and AI Studio quota. A 429/quota exhaustion is not a passing or fabricated analysis.
-- **Hosted history disappears:** use PostgreSQL `DATABASE_URL`; hosted free web-service local files are ephemeral.
-- **Migration command cannot find config:** run `alembic upgrade head` from `backend` with its virtual environment activated.
+- 🔑 Authentication and isolated user workspaces
+- 📦 Sandboxed execution for approved external projects
+- 🩹 Human-reviewed patch previews and verified fix workflows
+- 📈 Persistent rate limiting, audit logs, and CI integration
 
-## Screenshots
+## 👩‍💻 Author
 
-No screenshots have been captured yet. Add dashboard, run-detail and mobile screenshots here after launching the app locally.
+<div align="center">
 
-## Future improvements
+### **Amulya Munugoti**
 
-- User accounts and per-user isolated workspaces with authentication and authorization.
-- Dedicated isolated workers/containers for approved private repositories.
-- Structured AI diagnosis and human-approved, isolated patch preview plus verified application.
-- Persistent rate limiting, observability, audit log retention and more database migration coverage.
-- CI workflow, accessibility audit and visual regression coverage.S
+*Building practical tools with Python, testing, and AI-assisted workflows.*
 
+**ALL RIGHTS RESERVED BY AMULYA MUNUGOTI**
 
-
-ALL RIGHTS RESERVED BY AMULYA MUNUGOTI
+</div>
