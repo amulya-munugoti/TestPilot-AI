@@ -236,6 +236,6 @@ Review current hosting-provider limits before deployment. Hosted filesystems may
 
 *Building practical tools with Python, testing, and AI-assisted workflows.*
 
-**ALL RIGHTS RESERVED BY AMULYA MUNUGOTI**
+ALL RIGHTS RESERVED BY AMULYA MUNUGOTI
 
 </div>
