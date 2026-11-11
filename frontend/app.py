@@ -25,6 +25,14 @@ h2 { font-size:1.35rem !important; font-weight:700 !important; }
 h3 { font-size:1rem !important; font-weight:700 !important; }
 p, label, .stCaption { color:var(--muted); }
 div[data-testid="stMetric"] { background:white; border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
+div[data-testid="stMetric"] [data-testid="stMetricValue"] { color:var(--ink); font-family:'Manrope',sans-serif; font-weight:700; }
+.run-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:white; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:.55rem 0; }
+.run-title { color:var(--ink); font-weight:700; }
+.run-meta { color:var(--muted); font-size:.82rem; margin-top:.3rem; }
+.pill { display:inline-block; white-space:nowrap; border-radius:999px; padding:.3rem .65rem; font-size:.75rem; font-weight:700; }
+.pill-passed { color:#176044; background:#e7f5ed; }
+.pill-failed { color:#a23838; background:#fff0ef; }
+.pill-other { color:#72591a; background:#fff6df; }
 div[data-testid="stMetricLabel"] { color:#718079; font-weight:600; font-size:.84rem; }
 div[data-testid="stMetricValue"] { font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.04em; }
 .eyebrow { text-transform:uppercase; letter-spacing:.12em; font-size:.7rem; font-weight:700; color:var(--green); margin-bottom:.4rem; }
