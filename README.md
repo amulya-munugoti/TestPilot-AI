@@ -105,4 +105,4 @@ render.yaml            Render service blueprint
 
 ## Author
 
-Amulya Munugoti
+All Rights Are Reserved By Amulya Munugoti
