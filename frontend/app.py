@@ -54,6 +54,15 @@ div[data-testid="stMetricValue"] { font-family:'Manrope',sans-serif; font-weight
 div[data-testid="stTabs"] button { font-weight:600; }
 div[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
 .stAlert { border-radius:10px; }
+.hero { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; min-height:220px; padding:30px 38px; margin-bottom:28px; border-radius:22px; color:#f5fbf7; background:linear-gradient(115deg,#123b30 0%,#1d6049 58%,#2f8061 100%); box-shadow:0 16px 38px rgba(22,75,56,.13); }
+.hero:after { content:""; position:absolute; width:300px; height:300px; right:-110px; top:-170px; border:1px solid rgba(255,255,255,.12); border-radius:50%; box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025); }
+.hero-copy { position:relative; z-index:1; max-width:540px; }
+.hero-kicker { color:#a8ddbf; text-transform:uppercase; letter-spacing:.14em; font-size:.7rem; font-weight:700; margin-bottom:.7rem; }
+.hero h1 { color:#fff !important; font-size:2.1rem !important; line-height:1.16 !important; margin:0 0 .65rem !important; }
+.hero p { color:#d1e5da; font-size:.96rem; line-height:1.6; max-width:490px; margin:0; }
+.hero-art { flex:0 0 330px; max-width:38%; position:relative; z-index:1; }
+.hero-art svg { display:block; width:100%; height:auto; }
+@media(max-width:760px) { .hero { padding:25px; min-height:0; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -146,7 +155,30 @@ def main():
 
 
 def overview():
-    heading("Your testing, at a glance", "A clear view of suite health, recent runs, and the next action to take.")
+    st.markdown('''
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="hero-kicker">TestPilot workspace</div>
+        <h1>Your testing, at a glance</h1>
+        <p>See suite health, track recent runs, and get to the next useful action without losing your place.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 390 220" xmlns="http://www.w3.org/2000/svg" role="img">
+          <defs><linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e6f4ec"/></linearGradient><linearGradient id="line" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#58bd8b"/><stop offset="1" stop-color="#25815c"/></linearGradient></defs>
+          <circle cx="316" cy="50" r="42" fill="#b2e6c9" opacity=".12"/><circle cx="62" cy="181" r="55" fill="#b2e6c9" opacity=".10"/>
+          <rect x="42" y="25" width="300" height="172" rx="18" fill="#0c3429" opacity=".28" transform="rotate(-3 42 25)"/>
+          <g transform="rotate(-3 190 110)"><rect x="48" y="21" width="296" height="172" rx="16" fill="url(#panel)"/>
+          <rect x="48" y="21" width="296" height="31" rx="16" fill="#f3f7f4"/><path d="M48 38h296v14H48z" fill="#f3f7f4"/>
+          <circle cx="65" cy="36" r="3" fill="#ef9c8a"/><circle cx="77" cy="36" r="3" fill="#edc46e"/><circle cx="89" cy="36" r="3" fill="#7dc89c"/>
+          <rect x="68" y="68" width="82" height="7" rx="3.5" fill="#d7e3db"/><rect x="68" y="82" width="46" height="5" rx="2.5" fill="#e6ece8"/>
+          <rect x="68" y="104" width="118" height="69" rx="9" fill="#fff" stroke="#e6eee8"/><path d="M79 158l22-20 17 9 26-29 30 13" fill="none" stroke="url(#line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M79 161h91" stroke="#edf1ee" stroke-width="2"/>
+          <rect x="200" y="68" width="121" height="45" rx="9" fill="#fff" stroke="#e6eee8"/><circle cx="225" cy="90" r="12" fill="#e5f5eb"/><path d="m220 90 4 4 7-8" fill="none" stroke="#29835c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="245" y="83" width="59" height="5" rx="2.5" fill="#aebdb3"/><rect x="245" y="94" width="41" height="4" rx="2" fill="#dce6df"/>
+          <rect x="200" y="122" width="121" height="51" rx="9" fill="#fff" stroke="#e6eee8"/><rect x="213" y="134" width="5" height="26" rx="2.5" fill="#b9e4ca"/><rect x="224" y="143" width="5" height="17" rx="2.5" fill="#84cda2"/><rect x="235" y="130" width="5" height="30" rx="2.5" fill="#53ae7c"/><rect x="246" y="138" width="5" height="22" rx="2.5" fill="#2b805b"/><rect x="268" y="136" width="39" height="5" rx="2.5" fill="#dce6df"/><rect x="268" y="147" width="29" height="4" rx="2" fill="#edf1ee"/>
+          </g><circle cx="326" cy="166" r="23" fill="#d0f0dc"/><path d="m316 166 7 7 14-16" fill="none" stroke="#24764f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </section>
+    ''', unsafe_allow_html=True)
     data = call_or_warn("GET", "/dashboard")
     if data is None:
         return
