@@ -1,3 +1,4 @@
+import html
 import json
 import os
 from datetime import datetime, timezone
@@ -12,35 +13,29 @@ st.set_page_config(page_title="TestPilot AI", page_icon="✳", layout="wide", in
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
-:root { --ink:#17231f; --muted:#718079; --line:#e8eeea; --green:#28765c; --wash:#f6f8f6; }
+:root { --ink:#17231f; --muted:#718079; --line:#e5ebe7; --green:#28765c; --wash:#f6f8f6; }
 html, body, [class*="css"] { font-family:'DM Sans',sans-serif; color:var(--ink); }
 .stApp { background:#f7f9f7; }
 header[data-testid="stHeader"] { background:transparent; }
-.block-container { padding-top:2rem; padding-bottom:3rem; max-width:1440px; }
+.block-container { padding:1.8rem 2rem 3rem; max-width:1440px; }
 [data-testid="stSidebar"] { background:#fff; border-right:1px solid var(--line); }
 [data-testid="stSidebar"] .block-container { padding-top:1.6rem; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label { font-weight:600; }
 h1,h2,h3 { font-family:'Manrope',sans-serif !important; letter-spacing:-.035em; color:var(--ink); }
 h1 { font-size:2rem !important; font-weight:800 !important; }
 h2 { font-size:1.35rem !important; font-weight:700 !important; }
 h3 { font-size:1rem !important; font-weight:700 !important; }
 p, label, .stCaption { color:var(--muted); }
-div[data-testid="stMetric"] { background:white; border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
-div[data-testid="stMetric"] [data-testid="stMetricValue"] { color:var(--ink); font-family:'Manrope',sans-serif; font-weight:700; }
-.run-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:white; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:.55rem 0; }
-.run-title { color:var(--ink); font-weight:700; }
-.run-meta { color:var(--muted); font-size:.82rem; margin-top:.3rem; }
-.pill { display:inline-block; white-space:nowrap; border-radius:999px; padding:.3rem .65rem; font-size:.75rem; font-weight:700; }
-.pill-passed { color:#176044; background:#e7f5ed; }
-.pill-failed { color:#a23838; background:#fff0ef; }
-.pill-other { color:#72591a; background:#fff6df; }
-div[data-testid="stMetricLabel"] { color:#718079; font-weight:600; font-size:.84rem; }
-div[data-testid="stMetricValue"] { font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.04em; }
+div[data-testid="stMetric"] { background:white; border:1px solid var(--line); border-radius:14px; padding:16px 18px; box-shadow:0 2px 8px rgba(20,50,35,.025); }
+div[data-testid="stMetricLabel"] { color:var(--muted); font-weight:600; font-size:.82rem; }
+div[data-testid="stMetricValue"] { color:var(--ink); font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.04em; }
 .eyebrow { text-transform:uppercase; letter-spacing:.12em; font-size:.7rem; font-weight:700; color:var(--green); margin-bottom:.4rem; }
-.subhead { color:var(--muted); font-size:.94rem; margin-top:-.7rem; margin-bottom:1.4rem; }
-.panel { background:white; border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin-bottom:14px; }
-.run-row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:15px 0; border-bottom:1px solid #eff2ef; }
+.subhead { color:var(--muted); font-size:.94rem; margin-top:-.65rem; margin-bottom:1.6rem; }
+.panel { background:white; border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin-bottom:14px; box-shadow:0 3px 12px rgba(20,50,35,.025); }
+.run-row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:15px 2px; border-bottom:1px solid #eff2ef; }
+.run-row > div:first-child { min-width:0; }
 .run-row:last-child { border-bottom:0; padding-bottom:0; }
-.run-title { font-weight:700; color:var(--ink); }
+.run-title { font-weight:700; color:var(--ink); overflow-wrap:anywhere; }
 .run-meta { color:var(--muted); font-size:.82rem; margin-top:4px; }
 .pill { display:inline-block; border-radius:99px; padding:5px 10px; font-size:.73rem; font-weight:700; white-space:nowrap; }
 .pill-passed { background:#e8f5ed; color:#25734d; }
@@ -48,7 +43,9 @@ div[data-testid="stMetricValue"] { font-family:'Manrope',sans-serif; font-weight
 .pill-other { background:#f0f2f1; color:#68746d; }
 .brand { font-family:'Manrope',sans-serif; font-size:1.25rem; font-weight:800; letter-spacing:-.04em; padding:3px 0 24px; }
 .brand span { color:#2f8766; }
-.stButton > button { border-radius:9px; font-weight:700; min-height:2.65rem; }
+.stButton > button { border-radius:10px; font-weight:700; min-height:2.65rem; transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
+.stButton > button:hover { transform:translateY(-1px); box-shadow:0 5px 12px rgba(25,75,52,.1); }
+.stButton > button:focus-visible { outline:3px solid #89c9a3; outline-offset:2px; }
 .stButton > button[kind="primary"] { background:#28765c; border-color:#28765c; }
 .stButton > button[kind="primary"]:hover { background:#1f624a; border-color:#1f624a; }
 div[data-testid="stTabs"] button { font-weight:600; }
@@ -62,7 +59,9 @@ div[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12p
 .hero p { color:#d1e5da; font-size:.96rem; line-height:1.6; max-width:490px; margin:0; }
 .hero-art { flex:0 0 330px; max-width:38%; position:relative; z-index:1; }
 .hero-art svg { display:block; width:100%; height:auto; }
-@media(max-width:760px) { .hero { padding:25px; min-height:0; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } }
+@media(max-width:900px) { .block-container { padding-left:1.25rem; padding-right:1.25rem; } .hero-art { flex-basis:260px; } }
+@media(max-width:760px) { .block-container { padding:1.2rem 1rem 2.2rem; } .hero { padding:23px; min-height:0; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } .run-row { align-items:flex-start; } .run-meta { line-height:1.55; } div[data-testid="stMetric"] { padding:13px 14px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -104,12 +103,13 @@ def pretty_time(value):
             dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone().strftime("%b %d, %Y · %I:%M %p")
     except (ValueError, TypeError):
-        return value
+        return html.escape(str(value))
 
 
 def status_pill(status):
     kind = "passed" if status == "passed" else "failed" if status in ("failed", "error") else "other"
-    return f'<span class="pill pill-{kind}">{status.replace("_", " ").title()}</span>'
+    label = html.escape(str(status).replace("_", " ").title())
+    return f'<span class="pill pill-{kind}">{label}</span>'
 
 
 def show_runs(runs, limit=None):
@@ -117,7 +117,8 @@ def show_runs(runs, limit=None):
         st.info("No test runs yet. Start a run to see results and history here.")
         return
     for run in (runs[:limit] if limit else runs):
-        st.markdown(f'''<div class="run-row"><div><div class="run-title">Run #{run["id"]} · {run.get("summary") or "Test suite completed"}</div><div class="run-meta">{pretty_time(run.get("created_at"))} &nbsp;·&nbsp; {run.get("duration_ms", 0) / 1000:.2f}s &nbsp;·&nbsp; {run.get("passed", 0)} passed &nbsp;·&nbsp; {run.get("failed", 0)} failed</div></div>{status_pill(run.get("status", "unknown"))}</div>''', unsafe_allow_html=True)
+        summary = html.escape(str(run.get("summary") or "Test suite completed"))
+        st.markdown(f'''<div class="run-row"><div><div class="run-title">Run #{run["id"]} · {summary}</div><div class="run-meta">{pretty_time(run.get("created_at"))} &nbsp;·&nbsp; {run.get("duration_ms", 0) / 1000:.2f}s &nbsp;·&nbsp; {run.get("passed", 0)} passed &nbsp;·&nbsp; {run.get("failed", 0)} failed</div></div>{status_pill(run.get("status", "unknown"))}</div>''', unsafe_allow_html=True)
 
 
 def heading(title, subtitle, eyebrow="TESTPILOT WORKSPACE"):
