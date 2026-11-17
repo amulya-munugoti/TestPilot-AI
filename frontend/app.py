@@ -21,6 +21,7 @@ header[data-testid="stHeader"] { background:transparent; }
 [data-testid="stSidebar"] { background:#fff; border-right:1px solid var(--line); }
 [data-testid="stSidebar"] .block-container { padding-top:1.6rem; }
 [data-testid="stSidebar"] [data-testid="stRadio"] label { font-weight:600; }
+[data-testid="stSidebar"] [data-testid="stRadio"] [aria-checked="true"] { color:var(--green); }
 h1,h2,h3 { font-family:'Manrope',sans-serif !important; letter-spacing:-.035em; color:var(--ink); }
 h1 { font-size:2rem !important; font-weight:800 !important; }
 h2 { font-size:1.35rem !important; font-weight:700 !important; }
@@ -51,6 +52,7 @@ div[data-testid="stMetricValue"] { color:var(--ink); font-family:'Manrope',sans-
 div[data-testid="stTabs"] button { font-weight:600; }
 div[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
 .stAlert { border-radius:10px; }
+[data-testid="stHorizontalBlock"] { gap:1rem; }
 .hero { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; min-height:220px; padding:30px 38px; margin-bottom:28px; border-radius:22px; color:#f5fbf7; background:linear-gradient(115deg,#123b30 0%,#1d6049 58%,#2f8061 100%); box-shadow:0 16px 38px rgba(22,75,56,.13); }
 .hero:after { content:""; position:absolute; width:300px; height:300px; right:-110px; top:-170px; border:1px solid rgba(255,255,255,.12); border-radius:50%; box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025); }
 .hero-copy { position:relative; z-index:1; max-width:540px; }
@@ -60,7 +62,7 @@ div[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12p
 .hero-art { flex:0 0 330px; max-width:38%; position:relative; z-index:1; }
 .hero-art svg { display:block; width:100%; height:auto; }
 @media(max-width:900px) { .block-container { padding-left:1.25rem; padding-right:1.25rem; } .hero-art { flex-basis:260px; } }
-@media(max-width:760px) { .block-container { padding:1.2rem 1rem 2.2rem; } .hero { padding:23px; min-height:0; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } .run-row { align-items:flex-start; } .run-meta { line-height:1.55; } div[data-testid="stMetric"] { padding:13px 14px; } }
+@media(max-width:760px) { .block-container { padding:1.2rem 1rem 2.2rem; } .hero { padding:23px; min-height:0; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } .run-row { align-items:flex-start; } .run-meta { line-height:1.55; } div[data-testid="stMetric"] { padding:13px 14px; } [data-testid="stHorizontalBlock"] { flex-wrap:wrap; gap:.6rem; } [data-testid="stHorizontalBlock"] > [data-testid="column"] { flex:1 1 100% !important; min-width:100% !important; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; } }
 </style>
 """, unsafe_allow_html=True)
@@ -77,13 +79,17 @@ def api(method, path, **kwargs):
         raise APIError(f"Could not reach the TestPilot API at {API_URL}. Start the backend and check TESTPILOT_API_URL.") from exc
     if not response.ok:
         try:
-            detail = response.json().get("detail", response.text)
+            payload = response.json()
+            detail = payload.get("detail", response.text) if isinstance(payload, dict) else response.text
         except ValueError:
             detail = response.text
         raise APIError(str(detail) or f"Request failed ({response.status_code})")
     if response.status_code == 204 or not response.content:
         return None
-    return response.json()
+    try:
+        return response.json()
+    except ValueError as exc:
+        raise APIError(f"The TestPilot API returned an invalid response ({response.status_code}).") from exc
 
 
 def call_or_warn(method, path, **kwargs):
@@ -137,11 +143,14 @@ def main():
         st.markdown('<div class="brand">✳ TestPilot <span>AI</span></div>', unsafe_allow_html=True)
         page = st.radio("WORKSPACE", ["Overview", "Projects", "Test runs", "Settings"], label_visibility="visible", key="nav_page")
         st.divider()
-        health = call_or_warn("GET", "/health")
-        if health:
+        try:
+            health = api("GET", "/health")
             st.markdown("**System status**")
             st.caption("● API online" + (" · AI ready" if health.get("ai_configured") else " · AI not configured"))
             st.caption("Controlled demo environment")
+        except APIError:
+            st.markdown("**System status**")
+            st.caption("○ API offline · Start the backend to connect")
         st.divider()
         st.caption("TESTPILOT AI  ·  v1.0")
 
