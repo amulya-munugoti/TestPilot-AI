@@ -13,26 +13,31 @@ st.set_page_config(page_title="TestPilot AI", page_icon="✳", layout="wide", in
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
-:root { --ink:#17231f; --muted:#718079; --line:#e5ebe7; --green:#28765c; --wash:#f6f8f6; }
+:root { --ink:#17231f; --muted:#718079; --line:#e5ebe7; --green:#28765c; --wash:#f4f7f5; }
 html, body, [class*="css"] { font-family:'DM Sans',sans-serif; color:var(--ink); }
-.stApp { background:#f7f9f7; }
+.stApp { background:var(--wash); }
 header[data-testid="stHeader"] { background:transparent; }
-.block-container { padding:1.8rem 2rem 3rem; max-width:1440px; }
-[data-testid="stSidebar"] { background:#fff; border-right:1px solid var(--line); }
-[data-testid="stSidebar"] .block-container { padding-top:1.6rem; }
-[data-testid="stSidebar"] [data-testid="stRadio"] label { font-weight:600; }
-[data-testid="stSidebar"] [data-testid="stRadio"] [aria-checked="true"] { color:var(--green); }
+.block-container { padding:2rem 2.4rem 3.5rem; max-width:1500px; }
+[data-testid="stSidebar"] { background:linear-gradient(180deg,#123b30 0%,#163f33 55%,#17392f 100%); border-right:1px solid rgba(255,255,255,.08); }
+[data-testid="stSidebar"] .block-container { padding:1.8rem 1.1rem 1.5rem; }
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#e7f2ec; }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p { color:#a8c2b4; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label { font-weight:600; color:#c5d8ce; padding:.65rem .75rem; border-radius:10px; transition:background .15s ease,color .15s ease; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover { background:rgba(255,255,255,.07); color:#fff; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) { background:rgba(154,219,181,.15); color:#fff; }
+[data-testid="stSidebar"] hr { border-color:rgba(255,255,255,.13); }
 h1,h2,h3 { font-family:'Manrope',sans-serif !important; letter-spacing:-.035em; color:var(--ink); }
 h1 { font-size:2rem !important; font-weight:800 !important; }
 h2 { font-size:1.35rem !important; font-weight:700 !important; }
 h3 { font-size:1rem !important; font-weight:700 !important; }
 p, label, .stCaption { color:var(--muted); }
-div[data-testid="stMetric"] { background:white; border:1px solid var(--line); border-radius:14px; padding:16px 18px; box-shadow:0 2px 8px rgba(20,50,35,.025); }
+div[data-testid="stMetric"] { background:white; border:1px solid var(--line); border-radius:16px; padding:17px 19px; box-shadow:0 5px 18px rgba(20,50,35,.035); min-height:104px; }
 div[data-testid="stMetricLabel"] { color:var(--muted); font-weight:600; font-size:.82rem; }
 div[data-testid="stMetricValue"] { color:var(--ink); font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.04em; }
 .eyebrow { text-transform:uppercase; letter-spacing:.12em; font-size:.7rem; font-weight:700; color:var(--green); margin-bottom:.4rem; }
 .subhead { color:var(--muted); font-size:.94rem; margin-top:-.65rem; margin-bottom:1.6rem; }
-.panel { background:white; border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin-bottom:14px; box-shadow:0 3px 12px rgba(20,50,35,.025); }
+.panel { background:white; border:1px solid var(--line); border-radius:18px; padding:22px 24px; margin-bottom:16px; box-shadow:0 5px 20px rgba(20,50,35,.035); }
+.activity-card { background:#fff; border:1px solid var(--line); border-radius:18px; padding:4px 20px; box-shadow:0 5px 20px rgba(20,50,35,.035); }
 .run-row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:15px 2px; border-bottom:1px solid #eff2ef; }
 .run-row > div:first-child { min-width:0; }
 .run-row:last-child { border-bottom:0; padding-bottom:0; }
@@ -42,27 +47,34 @@ div[data-testid="stMetricValue"] { color:var(--ink); font-family:'Manrope',sans-
 .pill-passed { background:#e8f5ed; color:#25734d; }
 .pill-failed { background:#fff0ed; color:#ba4c3b; }
 .pill-other { background:#f0f2f1; color:#68746d; }
-.brand { font-family:'Manrope',sans-serif; font-size:1.25rem; font-weight:800; letter-spacing:-.04em; padding:3px 0 24px; }
-.brand span { color:#2f8766; }
-.stButton > button { border-radius:10px; font-weight:700; min-height:2.65rem; transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
+.brand { font-family:'Manrope',sans-serif; font-size:1.24rem; font-weight:800; letter-spacing:-.04em; padding:3px 0 24px; color:#fff; }
+.brand span { color:#90d4aa; }
+.side-status { border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.055); border-radius:13px; padding:13px 14px; color:#e7f2ec; font-size:.82rem; line-height:1.55; }
+.side-status strong { display:block; color:#fff; font-size:.87rem; margin-bottom:3px; }
+.side-status .online { color:#9be0b5; }
+.side-status .offline { color:#ffd0bd; }
+.stButton > button { border-radius:11px; font-weight:700; min-height:2.75rem; transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
 .stButton > button:hover { transform:translateY(-1px); box-shadow:0 5px 12px rgba(25,75,52,.1); }
 .stButton > button:focus-visible { outline:3px solid #89c9a3; outline-offset:2px; }
 .stButton > button[kind="primary"] { background:#28765c; border-color:#28765c; }
 .stButton > button[kind="primary"]:hover { background:#1f624a; border-color:#1f624a; }
 div[data-testid="stTabs"] button { font-weight:600; }
-div[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-.stAlert { border-radius:10px; }
+div[data-testid="stTabs"] [role="tablist"] { gap:.4rem; border-bottom:1px solid var(--line); }
+div[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.stAlert { border-radius:12px; border:1px solid rgba(30,90,60,.1); }
+[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea, [data-testid="stSelectbox"] [data-baseweb="select"] > div { border-radius:10px; }
+[data-testid="stTextInput"] input:focus, [data-testid="stTextArea"] textarea:focus { border-color:#63a986; box-shadow:0 0 0 1px #63a986; }
 [data-testid="stHorizontalBlock"] { gap:1rem; }
-.hero { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; min-height:220px; padding:30px 38px; margin-bottom:28px; border-radius:22px; color:#f5fbf7; background:linear-gradient(115deg,#123b30 0%,#1d6049 58%,#2f8061 100%); box-shadow:0 16px 38px rgba(22,75,56,.13); }
+.hero { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; min-height:230px; padding:34px 42px; margin-bottom:30px; border-radius:24px; color:#f5fbf7; background:linear-gradient(115deg,#123b30 0%,#1d6049 58%,#2f8061 100%); box-shadow:0 18px 42px rgba(22,75,56,.16); }
 .hero:after { content:""; position:absolute; width:300px; height:300px; right:-110px; top:-170px; border:1px solid rgba(255,255,255,.12); border-radius:50%; box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025); }
-.hero-copy { position:relative; z-index:1; max-width:540px; }
+.hero-copy { position:relative; z-index:1; max-width:570px; }
 .hero-kicker { color:#a8ddbf; text-transform:uppercase; letter-spacing:.14em; font-size:.7rem; font-weight:700; margin-bottom:.7rem; }
 .hero h1 { color:#fff !important; font-size:2.1rem !important; line-height:1.16 !important; margin:0 0 .65rem !important; }
 .hero p { color:#d1e5da; font-size:.96rem; line-height:1.6; max-width:490px; margin:0; }
 .hero-art { flex:0 0 330px; max-width:38%; position:relative; z-index:1; }
 .hero-art svg { display:block; width:100%; height:auto; }
-@media(max-width:900px) { .block-container { padding-left:1.25rem; padding-right:1.25rem; } .hero-art { flex-basis:260px; } }
-@media(max-width:760px) { .block-container { padding:1.2rem 1rem 2.2rem; } .hero { padding:23px; min-height:0; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } .run-row { align-items:flex-start; } .run-meta { line-height:1.55; } div[data-testid="stMetric"] { padding:13px 14px; } [data-testid="stHorizontalBlock"] { flex-wrap:wrap; gap:.6rem; } [data-testid="stHorizontalBlock"] > [data-testid="column"] { flex:1 1 100% !important; min-width:100% !important; } }
+@media(max-width:1050px) { .block-container { padding-left:1.4rem; padding-right:1.4rem; } .hero-art { flex-basis:260px; } }
+@media(max-width:760px) { .block-container { padding:1.2rem 1rem 2.2rem; } .hero { padding:23px; min-height:0; border-radius:18px; } .hero-art { display:none; } .hero h1 { font-size:1.7rem !important; } .run-row { align-items:flex-start; } .run-meta { line-height:1.55; } div[data-testid="stMetric"] { padding:13px 14px; min-height:auto; } .panel { padding:18px; } .activity-card { padding:2px 15px; } [data-testid="stHorizontalBlock"] { flex-wrap:wrap; gap:.6rem; } [data-testid="stHorizontalBlock"] > [data-testid="column"] { flex:1 1 100% !important; min-width:100% !important; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; } }
 </style>
 """, unsafe_allow_html=True)
@@ -122,9 +134,11 @@ def show_runs(runs, limit=None):
     if not runs:
         st.info("No test runs yet. Start a run to see results and history here.")
         return
+    rows = []
     for run in (runs[:limit] if limit else runs):
         summary = html.escape(str(run.get("summary") or "Test suite completed"))
-        st.markdown(f'''<div class="run-row"><div><div class="run-title">Run #{run["id"]} · {summary}</div><div class="run-meta">{pretty_time(run.get("created_at"))} &nbsp;·&nbsp; {run.get("duration_ms", 0) / 1000:.2f}s &nbsp;·&nbsp; {run.get("passed", 0)} passed &nbsp;·&nbsp; {run.get("failed", 0)} failed</div></div>{status_pill(run.get("status", "unknown"))}</div>''', unsafe_allow_html=True)
+        rows.append(f'''<div class="run-row"><div><div class="run-title">Run #{run["id"]} · {summary}</div><div class="run-meta">{pretty_time(run.get("created_at"))} &nbsp;·&nbsp; {run.get("duration_ms", 0) / 1000:.2f}s &nbsp;·&nbsp; {run.get("passed", 0)} passed &nbsp;·&nbsp; {run.get("failed", 0)} failed</div></div>{status_pill(run.get("status", "unknown"))}</div>''')
+    st.markdown(f'<div class="activity-card">{"".join(rows)}</div>', unsafe_allow_html=True)
 
 
 def heading(title, subtitle, eyebrow="TESTPILOT WORKSPACE"):
@@ -141,16 +155,20 @@ def main():
         st.session_state["nav_page"] = "Test runs"
     with st.sidebar:
         st.markdown('<div class="brand">✳ TestPilot <span>AI</span></div>', unsafe_allow_html=True)
-        page = st.radio("WORKSPACE", ["Overview", "Projects", "Test runs", "Settings"], label_visibility="visible", key="nav_page")
+        page = st.radio(
+            "WORKSPACE",
+            ["Overview", "Projects", "Test runs", "Settings"],
+            format_func=lambda item: {"Overview": "⌂  Overview", "Projects": "▦  Projects", "Test runs": "◷  Test runs", "Settings": "⚙  Settings"}[item],
+            label_visibility="visible",
+            key="nav_page",
+        )
         st.divider()
         try:
             health = api("GET", "/health")
-            st.markdown("**System status**")
-            st.caption("● API online" + (" · AI ready" if health.get("ai_configured") else " · AI not configured"))
-            st.caption("Controlled demo environment")
+            ai_status = "AI tools ready" if health.get("ai_configured") else "AI tools not configured"
+            st.markdown(f'<div class="side-status"><strong><span class="online">●</span> System online</strong>Backend connected<br>{ai_status}</div>', unsafe_allow_html=True)
         except APIError:
-            st.markdown("**System status**")
-            st.caption("○ API offline · Start the backend to connect")
+            st.markdown('<div class="side-status"><strong><span class="offline">●</span> System offline</strong>Start the backend to connect.</div>', unsafe_allow_html=True)
         st.divider()
         st.caption("TESTPILOT AI  ·  v1.0")
 
