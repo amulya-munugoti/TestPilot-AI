@@ -295,7 +295,16 @@ def runs_page():
     filters = st.columns([1, 1, 3])
     selected_status = filters[0].selectbox("Status", statuses)
     query = filters[1].text_input("Find run", placeholder="# or summary")
-    filtered = [r for r in runs if (selected_status == "All statuses" or r.get("status") == selected_status) and (not query or query.lower().replace("#", "") in str(r.get("id", "")).lower() or query.lower() in r.get("summary", "").lower())]
+    search_query = query.strip().lower().replace("#", "")
+    filtered = [
+        run for run in runs
+        if (selected_status == "All statuses" or run.get("status") == selected_status)
+        and (
+            not search_query
+            or search_query in str(run.get("id", "")).lower()
+            or search_query in str(run.get("summary") or "").lower()
+        )
+    ]
     filters[2].markdown(f"<div style='padding-top:2rem;color:#718079'>{len(filtered)} of {len(runs)} runs</div>", unsafe_allow_html=True)
     if not filtered:
         st.info("No runs match these filters.")

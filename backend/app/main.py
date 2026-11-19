@@ -133,7 +133,11 @@ def create_test_run(project_id: int, db: Session = Depends(get_db)):
         raise HTTPException(404, "Project not found")
     if project.name != "TestPilot Sample" or project.project_type != "python-pytest":
         raise HTTPException(400, "Only the bundled controlled sample suite can currently be executed")
-    data = run_sample_tests(int(os.getenv("TEST_TIMEOUT_SECONDS", "20")))
+    try:
+        timeout_seconds = int(os.getenv("TEST_TIMEOUT_SECONDS", "20"))
+    except (TypeError, ValueError):
+        timeout_seconds = 20
+    data = run_sample_tests(timeout_seconds)
     run = TestRun(project_id=project_id, **data)
     db.add(run)
     db.commit()
