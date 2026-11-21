@@ -90,7 +90,7 @@ def test_ai_analysis_and_test_generation_mocked(client, monkeypatch):
 
 
 def test_analysis_rejects_non_failure_and_handles_model_errors(client, monkeypatch):
-    async def fake_passing(_timeout=20):
+    def fake_passing(_timeout=20):
         return {"passed": 1, "failed": 0, "skipped": 0, "errors": 0, "status": "passed", "duration_ms": 5, "summary": "ok", "output": "1 passed"}
     monkeypatch.setattr(main, "run_sample_tests", fake_passing)
     project = client.get("/api/projects").json()[0]
