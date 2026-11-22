@@ -2,11 +2,16 @@ import html
 import json
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 import requests
 import streamlit as st
+from dotenv import load_dotenv
 
 
+# Resolve settings beside the dashboard so startup does not depend on the
+# current working directory. Existing process environment variables take precedence.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 API_URL = os.getenv("TESTPILOT_API_URL", "http://127.0.0.1:8000/api").rstrip("/")
 st.set_page_config(page_title="TestPilot AI", page_icon="✳", layout="wide", initial_sidebar_state="expanded")
 
