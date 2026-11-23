@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 # current working directory. Existing process environment variables take precedence.
 load_dotenv(Path(__file__).resolve().parent / ".env")
 API_URL = os.getenv("TESTPILOT_API_URL", "http://127.0.0.1:8000/api").rstrip("/")
+API_TIMEOUT_SECONDS = 25
+TEST_RUN_TIMEOUT_SECONDS = 75  # Backend test runs can take up to 60 seconds.
 st.set_page_config(page_title="TestPilot AI", page_icon="✳", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
@@ -90,8 +92,9 @@ class APIError(Exception):
 
 
 def api(method, path, **kwargs):
+    timeout = kwargs.pop("timeout", API_TIMEOUT_SECONDS)
     try:
-        response = requests.request(method, f"{API_URL}{path}", timeout=25, **kwargs)
+        response = requests.request(method, f"{API_URL}{path}", timeout=timeout, **kwargs)
     except requests.RequestException as exc:
         raise APIError(f"Could not reach the TestPilot API at {API_URL}. Start the backend and check TESTPILOT_API_URL.") from exc
     if not response.ok:
@@ -150,11 +153,6 @@ def heading(title, subtitle, eyebrow="TESTPILOT WORKSPACE"):
     st.markdown(f'<div class="eyebrow">{eyebrow}</div><h1>{title}</h1><div class="subhead">{subtitle}</div>', unsafe_allow_html=True)
 
 
-def refresh():
-    st.cache_data.clear()
-    st.rerun()
-
-
 def main():
     if st.session_state.pop("go_to_runs", False):
         st.session_state["nav_page"] = "Test runs"
@@ -170,7 +168,7 @@ def main():
         st.divider()
         try:
             health = api("GET", "/health")
-            ai_status = "AI tools ready" if health.get("ai_configured") else "AI tools not configured"
+            ai_status = "Gemini key configured" if health.get("ai_configured") else "Gemini key not configured"
             st.markdown(f'<div class="side-status"><strong><span class="online">●</span> System online</strong>Backend connected<br>{ai_status}</div>', unsafe_allow_html=True)
         except APIError:
             st.markdown('<div class="side-status"><strong><span class="offline">●</span> System offline</strong>Start the backend to connect.</div>', unsafe_allow_html=True)
@@ -232,7 +230,11 @@ def overview():
         sample = next((p for p in projects if p["name"] == "TestPilot Sample"), None)
         if sample and st.button("▶  Run test suite", type="primary", use_container_width=True):
             with st.spinner("Running the controlled Pytest suite…"):
-                result = call_or_warn("POST", f'/projects/{sample["id"]}/test-runs')
+                result = call_or_warn(
+                    "POST",
+                    f'/projects/{sample["id"]}/test-runs',
+                    timeout=TEST_RUN_TIMEOUT_SECONDS,
+                )
             if result:
                 st.success(f'Run #{result["id"]} finished · {result.get("passed", 0)} passed · {result.get("failed", 0)} failed')
                 st.session_state["selected_run"] = result["id"]
